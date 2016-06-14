@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+
+var args =process.argv.slice(2);
+var conf = args.join(' ');
+
+var config = {};
+var list = [];
+var tmpKey = '0';
+if (conf) list = conf.split(' ');
+
+list.forEach(function(item, idx){
+  var key = idx + 1;
+  if (key%2===0){
+    config[tmpKey] = item;
+  }else{
+    tmpKey = item;
+  }
+});
+
+var app = require('../index');
+app(config);

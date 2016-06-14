@@ -1,0 +1,36 @@
+{
+  "name": "browser-proxy",
+  "version": "1.0.9",
+  "description": "a proxy for browser",
+  "main": "index.js",
+  "bin": {
+    "browser-proxy": "./bin/browser-proxy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://zobor.me"
+  },
+  "keywords": [
+    "proxy,nodejs proxy, browser-proxy"
+  ],
+  "author": {
+    "name": "zobor",
+    "email": "nodejs.js@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zobor/browser-proxy/issues"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "preferGlobal": true,
+  "homepage": "https://github.com/zobor/browser-proxy",
+  "dependencies": {
+    "chokidar": "^1.5.2",
+    "colors": "^1.1.2",
+    "decache": "^3.1.0",
+    "node.extend": "^1.1.5",
+    "request": "^2.72.0"
+  }
+}
