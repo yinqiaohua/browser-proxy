@@ -3,6 +3,7 @@
  */
 
 var http = require('http');
+var https = require('https');
 var r = require('request');
 var R;
 var fs = require('fs');
@@ -13,12 +14,16 @@ var os = require('os');
 var util = require('./common/util');
 var dns = require('dns');
 var dnsCache = {};
-// var shelljs = require('shelljs');
 var config = require('./config');
 var colors = require('colors');
 var decache = require('decache');
 
-R = r;
+if (process.env.http_proxy) {
+  R = r.defaults({'proxy':process.env.http_proxy});
+  util.showLog(['[Info] Current Extenal Proxy:', 'red'],[ process.env.http_proxy, 'red.underline'])
+}else{
+  R = r;
+}
 // use fiddler show request log detail
 // if (true) {
 //   R = R.defaults({'proxy':'http://127.0.0.1:8888'});
@@ -52,7 +57,7 @@ watcher
   defaultHeaders = config.headers;
 })
 .on('ready', function() {
-  util.showLog(['Initial scan complete. Ready for changes.', 'gray']);
+  util.showLog(['Initial scan complete. Ready for changes.', 'gray.underline']);
 });
 
 
@@ -61,6 +66,9 @@ function startServer(options){
   util.showLog(['App Config:', 'underline.yellow.bold'], [JSON.stringify(options), 'yellow.bold']);
   AppPort = options['-p'] || AppPort;
   server = http.createServer(function(req, res){
+    if (req.url) {
+
+    }
     var inRules = false;
     var urlParse = URL.parse(req.url);
     if (!rules || rules.constructor!==Array) {
@@ -79,6 +87,7 @@ function startServer(options){
       var tmp;
       var _matchFiles = [];
       var isFileExist = true;
+      var basePath='';
       // 正则匹配
       if (item.regx) {
         if (typeof item.regx==='string'){
@@ -105,9 +114,18 @@ function startServer(options){
         matchFiles = RegExp.$1.replace(new RegExp(item.replacePath, 'ig') || '', '');
         if (matchFiles){
           matchFiles = matchFiles.split(',');
+          if (matchFiles && matchFiles.length){
+            basePath = matchFiles[0].split('/');
+            basePath.pop();
+            basePath = basePath.join('/') + '/';
+          }
           _matchFiles = [];
           matchFiles.forEach(function(filename, idx){
-            _matchFiles.push(item.localPath + filename);
+            if (idx>0){
+              _matchFiles.push(item.localPath + basePath + filename);
+            }else{
+              _matchFiles.push(item.localPath + filename);
+            }
           });
           matchFiles = _matchFiles;
         }
@@ -217,7 +235,7 @@ function sendRequest(req, res, urlParse, item, headers){
   }
 
   if (req.method === 'GET') {
-    var newRst = request.get(requestConfig, function(err,response, body){
+    request.get(requestConfig, function(err,response, body){
       requestHandler({
         req: req,
         err: err,
@@ -226,7 +244,6 @@ function sendRequest(req, res, urlParse, item, headers){
         useHOST: useHOST,
         requestConfig: requestConfig
       });
-      // newRst.pipe(res);
     })
     .pipe(res)
   }else{
@@ -237,7 +254,7 @@ function sendRequest(req, res, urlParse, item, headers){
     });
     req.on('end', function () {
       requestConfig.form = postBody.join('');
-      var newRst =request.post(requestConfig, function(err,response, body){
+      request.post(requestConfig, function(err,response, body){
         requestHandler({
           req: req,
           err: err,
@@ -246,7 +263,6 @@ function sendRequest(req, res, urlParse, item, headers){
           useHOST: useHOST,
           requestConfig: requestConfig
         });
-        // newRst.pipe(res);
       }).pipe(res)
     });
   }
@@ -314,11 +330,13 @@ function parseHost(){
     });
   });
   util.showLog(
-    ['Browser Proxy Hosts:', 'yellow.bold'],
-    [JSON.stringify(hosts), 'magenta']
+    ['Browser Proxy Hosts:', 'yellow'],
+    [JSON.stringify(hosts), 'yellow.underline']
   );
 }
 
-
+process.on('uncaughtException', function(err){
+  console.error('uncaughtException: ' + err.message);
+});
 
 module.exports = startServer;

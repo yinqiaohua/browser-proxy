@@ -15,23 +15,23 @@ var rules = [
   // }
 
   // url map to localfile
-  {
-    "indexof": "http://livew.l.qq.com/livemsg?pf=H5&ad_type=WL",
-    "localFile": "/Users/zoborzhang/test/ad-xml/wl.xml",
-    "responseHeaders": {
-      "Access-Control-Allow-Origin":"http://v.qq.com",
-      "Access-Control-Allow-Credentials": true
-    }
-  },
+  // {
+  //   "indexof": "http://livew.l.qq.com/livemsg?pf=H5&ad_type=WL",
+  //   "localFile": "/Users/zoborzhang/test/ad-xml/wl.xml",
+  //   "responseHeaders": {
+  //     "Access-Control-Allow-Origin":"http://v.qq.com",
+  //     "Access-Control-Allow-Credentials": true
+  //   }
+  // },
 
-  {
-    "indexof": "http://livew.l.qq.com/livemsg?pf=H5&ad_type=WC",
-    "localFile": "/Users/zoborzhang/test/ad-xml/wc.xml",
-    "responseHeaders": {
-      "Access-Control-Allow-Origin":"http://v.qq.com",
-      "Access-Control-Allow-Credentials": "true"
-    }
-  },
+  // {
+  //   "indexof": "http://livew.l.qq.com/livemsg?pf=H5&ad_type=WC",
+  //   "localFile": "/Users/zoborzhang/test/ad-xml/wc.xml",
+  //   "responseHeaders": {
+  //     "Access-Control-Allow-Origin":"http://v.qq.com",
+  //     "Access-Control-Allow-Credentials": "true"
+  //   }
+  // },
 
   // remote path map to local path
   // {
@@ -48,14 +48,14 @@ var rules = [
   // },
 
   // remote path map to local path
-  // {
-  //   "regxPath": "http://vm.gtimg.cn/tencentvideo/txp/js/([^?]+)",
-  //   "localPath": "/Users/zoborzhang/codes/txplayer/debug/",
-  //   "responseHeaders": {
-  //     "Content-Type": "application/javascript",
-  //     "Access-Control-Allow-Origin":"*"
-  //   }
-  // },
+  {
+    "regxPath": "http://vm.gtimg.cn/tencentvideo/txp/js/([^?]+)",
+    "localPath": "/Users/zoborzhang/codes/txplayer/debug/",
+    "responseHeaders": {
+      "Content-Type": "application/javascript",
+      "Access-Control-Allow-Origin":"*"
+    }
+  },
 
   // // // combo
   {
@@ -66,17 +66,17 @@ var rules = [
       "Content-Type": "application/javascript",
       "Access-Control-Allow-Origin":"*"
     }
-  }
-
-  {
-    "indexof": "http://h5vv.video.qq.com/getinfo",
-    "httpResponseCode": "404"
   },
 
-  {
-    "indexof": "http://qzs.qq.com/tencentvideo_v1/tvp/js/tvp.player_v2_txv_vod.js",
-    "host": "10.123.9.9"
-  }
+  // {
+  //   "indexof": "http://h5vv.video.qq.com/getinfo",
+  //   "httpResponseCode": "404"
+  // },
+
+  // {
+  //   "indexof": "http://qzs.qq.com/tencentvideo_v1/tvp/js/tvp.player_v2_txv_vod.js",
+  //   "host": "10.123.9.9"
+  // }
 ];
 
 var hosts = function(){
@@ -85,6 +85,8 @@ var hosts = function(){
 #10.123.9.9 imgcache.qq.com
 #10.134.13.46 imgcache.qq.com
 10.134.13.46 vm.gtimg.cn
+14.17.52.182 p.l.qq.com
+119.147.33.11 ra.gtimg.com
 
 #10.123.9.9 vm.gtimg.cn
 127.0.0.1 v1.qq.com
@@ -94,7 +96,7 @@ var hosts = function(){
 };
 
 var headers = {
-  "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1"
+  "User-Agent2": "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1"
 };
 
 var noProxy = [
