@@ -17,7 +17,7 @@ var rules = [
   // url map to localfile
   // {
   //   "indexof": "http://livew.l.qq.com/livemsg?pf=H5&ad_type=WL",
-  //   "localFile": "/Users/zoborzhang/test/ad-xml/wl.xml",
+  //   "localFile": "E:\\test\\wl.xml",
   //   "responseHeaders": {
   //     "Access-Control-Allow-Origin":"http://v.qq.com",
   //     "Access-Control-Allow-Credentials": true
@@ -26,7 +26,7 @@ var rules = [
 
   // {
   //   "indexof": "http://livew.l.qq.com/livemsg?pf=H5&ad_type=WC",
-  //   "localFile": "/Users/zoborzhang/test/ad-xml/wc.xml",
+  //   "localFile": "E:\\test\\wc.xml",
   //   "responseHeaders": {
   //     "Access-Control-Allow-Origin":"http://v.qq.com",
   //     "Access-Control-Allow-Credentials": "true"
@@ -34,10 +34,10 @@ var rules = [
   // },
 
   // remote path map to local path
-  // {
-  //   "regxPath": "http://imgcache.qq.com/tencentvideo_v1/tvp/js/([^?]+)",
-  //   "localPath": "/Users/zoborzhang/codes/livesvn/javascript/release/tencentvideo_v1/tvp/_debug_/"
-  // },
+  {
+    "regxPath": "http://imgcache.qq.com/tencentvideo_v1/tvp/js/([^?]+)",
+    "localPath": "F:\\works\\livesvn\\release\\tencentvideo_v1\\tvp\\_debug_\\"
+  },
   // {
   //   "indexof": "http://m.v.qq.com/tvp/e_appbanner.html",
   //   "localFile": "../google-ip/1ping.data.txts"
@@ -50,7 +50,8 @@ var rules = [
   // remote path map to local path
   {
     "regxPath": "http://vm.gtimg.cn/tencentvideo/txp/js/([^?]+)",
-    "localPath": "/Users/zoborzhang/codes/txplayer/debug/",
+    // "localPath": "/Users/zoborzhang/codes/txplayer/debug/",
+    "localPath":"F:\\txplayer\\debug\\",
     "responseHeaders": {
       "Content-Type": "application/javascript",
       "Access-Control-Allow-Origin":"*"
@@ -61,7 +62,8 @@ var rules = [
   {
     "regxCombo": "http://vm.gtimg.cn/c/=/tencentvideo/txp/js/([^?]+)",
     "replacePath": "\/tencentvideo\/txp\/js\/",
-    "localPath": "/Users/zoborzhang/codes/txplayer/debug/",
+    // "localPath": "/Users/zoborzhang/codes/txplayer/debug/",
+    "localPath":"F:\\txplayer\\debug\\",
     "responseHeaders": {
       "Content-Type": "application/javascript",
       "Access-Control-Allow-Origin":"*"
@@ -76,27 +78,36 @@ var rules = [
   // {
   //   "indexof": "http://qzs.qq.com/tencentvideo_v1/tvp/js/tvp.player_v2_txv_vod.js",
   //   "host": "10.123.9.9"
-  // }
+  // },
+
+  {
+    indexof: 'http://btrace.video.qq.com/kvcollect?BossId=3720',
+    // indexof: 'http://btrace.video.qq.com/kvcollect?',
+    colors: 'red.bgYellow'
+  }
 ];
 
 var hosts = function(){
 /*
 
-#10.123.9.9 imgcache.qq.com
 #10.134.13.46 imgcache.qq.com
-10.134.13.46 vm.gtimg.cn
-14.17.52.182 p.l.qq.com
-119.147.33.11 ra.gtimg.com
+#10.134.13.46 vm.gtimg.cn
+#10.134.13.46  qzs.qq.com
+
+10.123.9.9 imgcache.qq.com
+#10.134.13.46 imgcache.qq.com
+#10.134.13.46 vm.gtimg.cn
 
 #10.123.9.9 vm.gtimg.cn
-127.0.0.1 v1.qq.com
+#10.123.9.9 v1.qq.com
 #10.177.130.230 mfm.video.qq.com
+#127.0.0.1 livew.l.qq.com
 
 */
 };
 
 var headers = {
-  "User-Agent2": "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1"
+  "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1"
 };
 
 var noProxy = [

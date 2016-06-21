@@ -26,8 +26,8 @@ if (process.env.http_proxy) {
 }
 // use fiddler show request log detail
 // if (true) {
-//   R = R.defaults({'proxy':'http://127.0.0.1:8888'});
-//   r = r.defaults({'proxy':'http://127.0.0.1:8888'});
+//   R = R.defaults({'proxy':'http://127.0.0.1:9999'});
+//   r = r.defaults({'proxy':'http://127.0.0.1:9999'});
 // }
 
 var rules;
@@ -121,11 +121,12 @@ function startServer(options){
           }
           _matchFiles = [];
           matchFiles.forEach(function(filename, idx){
-            if (idx>0){
-              _matchFiles.push(item.localPath + basePath + filename);
-            }else{
-              _matchFiles.push(item.localPath + filename);
-            }
+            // if (idx>0){
+            //   _matchFiles.push(item.localPath + basePath + filename);
+            // }else{
+            //   _matchFiles.push(item.localPath + filename);
+            // }
+            _matchFiles.push(item.localPath + filename);
           });
           matchFiles = _matchFiles;
         }
@@ -242,7 +243,8 @@ function sendRequest(req, res, urlParse, item, headers){
         response: response,
         body: body,
         useHOST: useHOST,
-        requestConfig: requestConfig
+        requestConfig: requestConfig,
+        colors: item.colors
       });
     })
     .pipe(res)
@@ -290,7 +292,25 @@ function requestHandler(options){
         [options.req.url, 'red']
       );
     }else{
-      if (options.useHOST) {
+      if (options.colors) {
+        util.showLog(
+          [util.dateFormat(), options.colors],
+          [options.req.method, options.colors],
+          [options.response.statusCode, options.colors],
+          [options.req.headers.host, options.colors],
+          [options.requestConfig.hostname||'',options.colors],
+          [options.req.url, options.colors]
+        );
+        function decodeShowUrlParam(a){
+          var b = URL.parse(a);
+          if (!b || !b.query) return;
+          var c = b.query.split('&').join('\n');
+          var d = decodeURIComponent( c );
+          util.showLog([d, options.colors]);
+        }
+        decodeShowUrlParam(options.req.url);
+      }
+      else if (options.useHOST) {
         util.showLog(
           [util.dateFormat(), 'green'],
           [options.req.method, 'green'],
