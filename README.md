@@ -19,27 +19,30 @@ browser-proxy
 
 // set port & start browser-proxy
 browser-proxy -p 8888
+
+// set a config file
+browser-proxy -c /path/to/local/file/browser-proxy.config.js
 ```
 
 ## 代理规则
 
-`代理规则参考config.js`
+`代理规则参考config.example.js`
 
-### 代理请求到本地文件
+### >> 代理请求到本地文件
 ```
 {
 	"indexof": "http://m.v.qq.com/tvp/index.html",
-	"localFile": "/Users/zoborzhang/test/tvp/index.html"
+	"localFile": "/path/to/local/file/index.html"
 }
 ```
-### 代理请求到本地目录
+### >> 代理请求到本地目录
 ```
 {
   "regxPath": "http://imgcache.qq.com/tencentvideo_v1/tvp/js/([^?]+)",
-  "localPath": "/Users/zoborzhang/codes/tvp/"
+  "localPath": "/path/to/local/file/"
 }
 ```
-### 代理文请求添加responseHeaders
+### >> 代理文请求添加responseHeaders
 ```
 {
   "regxPath": "http://imgcache.qq.com/tencentvideo_v1/tvp/js/([^?]+)",
@@ -50,12 +53,12 @@ browser-proxy -p 8888
 	}
 }
 ```
-### cdn合并请求代理
+### >> cdn合并请求代理
 ```
 {
   "regxCombo": "http://vm.gtimg.cn/c/=/tencentvideo/txp/js/([^?]+)",
   "replacePath": "\/tencentvideo\/txp\/js\/",
-  "localPath": "/Users/zoborzhang/codes/txplayer/debug/",
+  "localPath": "/path/to/local/file/",
   "responseHeaders": {
 	"Access-Control-Allow-Origin":"http://v.qq.com",
 	"Content-Type": "application/javascript",
@@ -63,21 +66,29 @@ browser-proxy -p 8888
   }
 }
 ```
-### cgi指定返回http status code
+### >> 支持cgi jsonp
+```
+{
+  "indexof": "http://h5vv.video.qq.com/getinfo",
+  "localFile": "/path/to/local/file/getinfo.json"
+  "useJSONPCallback": true
+}
+```
+### >> cgi指定返回http status code
 ```
 {
   "indexof": "http://h5vv.video.qq.com/getinfo",
   "httpResponseCode": "404"
 }
 ```
-### 单个请求指定hosts
+### >> 单个请求指定hosts
 ```
 {
   "indexof": "http://qzs.qq.com/tencentvideo_v1/tvp/js/tvp.player_v2_txv_vod.js",
   "host": "10.123.9.9"
 }
 ```
-### 修改host无需重启app
+### >> 修改host无需重启app
 ```
 var hosts = function(){
 /*

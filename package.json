@@ -1,6 +1,6 @@
 {
   "name": "browser-proxy",
-  "version": "1.0.9",
+  "version": "1.0.12",
   "description": "a proxy for browser",
   "main": "index.js",
   "bin": {
@@ -22,14 +22,13 @@
     "url": "https://github.com/zobor/browser-proxy/issues"
   },
   "engines": {
-    "node": ">= 0.10.0"
+    "node": ">= 5.1.1"
   },
   "preferGlobal": true,
   "homepage": "https://github.com/zobor/browser-proxy",
   "dependencies": {
     "chokidar": "^1.5.2",
     "colors": "^1.1.2",
-    "decache": "^3.1.0",
     "node.extend": "^1.1.5",
     "request": "^2.72.0"
   }

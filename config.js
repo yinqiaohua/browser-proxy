@@ -1,107 +1,14 @@
-var rules = [
-  // {
-  //   "regx": ".htmlx",
-  //   "localFile": "../google-ip/1ping.data.txt"
-  // },
-
-  // {
-  //   "indexof": "http://m.v.qq.com/tvp/1.html",
-  //   "localFile": "/Users/zoborzhang/test/tvp/edugetinfo.html"
-  // },
-
-  // {
-  //   "indexof":"http://test.m.v.qq.com/zoborzhang/tvp/livepid.html",
-  //   "localFile":"/Users/zoborzhang/test/tvp/livepid.html"
-  // }
-
-  // url map to localfile
-  // {
-  //   "indexof": "http://livew.l.qq.com/livemsg?pf=H5&ad_type=WL",
-  //   "localFile": "E:\\test\\wl.xml",
-  //   "responseHeaders": {
-  //     "Access-Control-Allow-Origin":"http://v.qq.com",
-  //     "Access-Control-Allow-Credentials": true
-  //   }
-  // },
-
-  // {
-  //   "indexof": "http://livew.l.qq.com/livemsg?pf=H5&ad_type=WC",
-  //   "localFile": "E:\\test\\wc.xml",
-  //   "responseHeaders": {
-  //     "Access-Control-Allow-Origin":"http://v.qq.com",
-  //     "Access-Control-Allow-Credentials": "true"
-  //   }
-  // },
-
-  // remote path map to local path
-  {
-    "regxPath": "http://imgcache.qq.com/tencentvideo_v1/tvp/js/([^?]+)",
-    "localPath": "F:\\works\\livesvn\\release\\tencentvideo_v1\\tvp\\_debug_\\"
-  },
-  // {
-  //   "indexof": "http://m.v.qq.com/tvp/e_appbanner.html",
-  //   "localFile": "../google-ip/1ping.data.txts"
-  // }
-  // {
-  //   "regxPath": "http://qzs.qq.com/tencentvideo_v1/tvp/js/([^?]+)",
-  //   "localPath": "/Users/zoborzhang/codes/livesvn/javascript/release/tencentvideo_v1/tvp/_debug_/"
-  // },
-
-  // remote path map to local path
-  {
-    "regxPath": "http://vm.gtimg.cn/tencentvideo/txp/js/([^?]+)",
-    // "localPath": "/Users/zoborzhang/codes/txplayer/debug/",
-    "localPath":"F:\\txplayer\\debug\\",
-    "responseHeaders": {
-      "Content-Type": "application/javascript",
-      "Access-Control-Allow-Origin":"*"
-    }
-  },
-
-  // // // combo
-  {
-    "regxCombo": "http://vm.gtimg.cn/c/=/tencentvideo/txp/js/([^?]+)",
-    "replacePath": "\/tencentvideo\/txp\/js\/",
-    // "localPath": "/Users/zoborzhang/codes/txplayer/debug/",
-    "localPath":"F:\\txplayer\\debug\\",
-    "responseHeaders": {
-      "Content-Type": "application/javascript",
-      "Access-Control-Allow-Origin":"*"
-    }
-  },
-
-  // {
-  //   "indexof": "http://h5vv.video.qq.com/getinfo",
-  //   "httpResponseCode": "404"
-  // },
-
-  // {
-  //   "indexof": "http://qzs.qq.com/tencentvideo_v1/tvp/js/tvp.player_v2_txv_vod.js",
-  //   "host": "10.123.9.9"
-  // },
-
-  {
-    indexof: 'http://btrace.video.qq.com/kvcollect?BossId=3720',
-    // indexof: 'http://btrace.video.qq.com/kvcollect?',
-    colors: 'red.bgYellow'
-  }
-];
+var rules = [];
 
 var hosts = function(){
 /*
 
-#10.134.13.46 imgcache.qq.com
-#10.134.13.46 vm.gtimg.cn
-#10.134.13.46  qzs.qq.com
-
-10.123.9.9 imgcache.qq.com
-#10.134.13.46 imgcache.qq.com
-#10.134.13.46 vm.gtimg.cn
-
-#10.123.9.9 vm.gtimg.cn
-#10.123.9.9 v1.qq.com
-#10.177.130.230 mfm.video.qq.com
-#127.0.0.1 livew.l.qq.com
+#127.0.0.1 v.qq.com
+10.134.13.46 imgcache.qq.com
+10.134.13.46 vm.gtimg.cn
+10.6.207.90 v.qq.com
+10.137.15.231 pay.video.qq.com
+10.6.207.48 data.video.qq.com
 
 */
 };
@@ -111,10 +18,7 @@ var headers = {
 };
 
 var noProxy = [
-  'qq.com',
-  'oa.com',
-  'gtimg.cn',
-  'zobor.me2'
+  'qq.com'
 ];
 
 module.exports = {
