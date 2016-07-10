@@ -293,7 +293,7 @@ function sendRequest(req, res, urlParse, item, headers){
     useHOST = true;
   }
   if (!useHOST) {
-    dns.lookup(urlParse.hostname, (err, addresses, family) => {
+    dns.lookup(urlParse.hostname, function(err, addresses, family){
       requestConfig.hostname = addresses;
     });
   }

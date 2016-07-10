@@ -1,6 +1,6 @@
 {
   "name": "browser-proxy",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "a proxy for browser",
   "main": "index.js",
   "bin": {
