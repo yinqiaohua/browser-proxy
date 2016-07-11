@@ -23,6 +23,20 @@ var colors = require('colors');
 var path = require('path');
 var chokidar = require('chokidar');
 
+util.showLog([
+  [
+    '',
+    '',
+    '---------- READ ME ----------',
+    'Externel Proxy Setting:'.bold,
+    'export http_proxy_browser=http://example.com:port'.underline,
+    'app support config:'.bold,
+    '* browser-proxy -p 8888'.underline,
+    '* browser-proxy -c ./config.js'.underline,
+    ''
+  ].join('\n')
+, 'bgYellow.red']);
+
 if (process.env.http_proxy_browser) {
   R = R.defaults({'proxy':process.env.http_proxy_browser});
   util.showLog(['[Info] Current Extenal Proxy:', 'red'],[ process.env.http_proxy_browser, 'red.underline'])
@@ -41,6 +55,7 @@ function watchConfigUpdate(options){
   if(options.configPath){
     configFilePath = options.configPath;
   }
+  util.showLog(['Browser Proxy Watching Config:', 'gray'], [path.resolve(configFilePath), 'underline.gray']);
   // 加载配置
   config = require(configFilePath);
   parseHost();
@@ -55,16 +70,13 @@ function watchConfigUpdate(options){
     config = require(configFilePath);
     parseHost();
   })
-  .on('ready', function() {
-    util.showLog(['Initial scan complete. Ready for changes.', 'gray.underline']);
-  });
+  .on('ready', function() {});
   hasWatched = true;
 }
 
 
 function startServer(options){
   options = options || {};
-  util.showLog(['App Config:', 'underline.yellow.bold'], [JSON.stringify(options), 'yellow.bold']);
   AppPort = options['-p'] || AppPort;
   watchConfigUpdate({
     configPath: options['-c']

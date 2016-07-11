@@ -2,6 +2,7 @@
 
 var args =process.argv.slice(2);
 var conf = args.join(' ');
+var path = require('path');
 
 var config = {};
 var list = [];
@@ -18,4 +19,7 @@ list.forEach(function(item, idx){
 });
 
 var app = require('../index');
+if (config['-c']) {
+  config['-c'] = path.resolve(config['-c'])
+}
 app(config);
