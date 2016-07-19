@@ -2,8 +2,7 @@
  * @author zobrzhang
  * @copyright 2016
  * @description a proxy for mac browser
- * @source
- * @colors: https://github.com/marak/colors.js/
+ * @source https://github.com/zobor/browser-proxy
  */
 
 var http = require('http');
@@ -281,7 +280,10 @@ function sendRequest(req, res, urlParse, item, headers){
   item = item || {};
   headers = headers || {};
   var request = r, useHOST = false;
-  if ( config.noProxy.indexOf( util.getTopDomain(urlParse.hostname) )>-1 ) {
+  // in noProxy or in hosts
+  if ( config.noProxy.indexOf( util.getTopDomain(urlParse.hostname) )>-1 ||
+    config.hosts[urlParse.hostname]
+  ) {
     request = r;
   }else{
     request = R;

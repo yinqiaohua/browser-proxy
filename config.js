@@ -4,11 +4,6 @@ var hosts = function(){
 /*
 
 #127.0.0.1 v.qq.com
-10.134.13.46 imgcache.qq.com
-10.134.13.46 vm.gtimg.cn
-10.6.207.90 v.qq.com
-10.137.15.231 pay.video.qq.com
-10.6.207.48 data.video.qq.com
 
 */
 };
