@@ -231,9 +231,9 @@ function app(req, res){
       resHeaders = extend(resHeaders, item.responseHeaders);
     }
     // 指定返回http code
-    if (item.httpResponseCode && (item.httpResponseCode+'').indexOf('4')===0) {
+    if (item.httpResponseCode) {
       res.writeHead(item.httpResponseCode, resHeaders);
-      res.end('');
+      res.end();
     }
     // 代理到本地文件
     else if (content) {
@@ -392,6 +392,12 @@ function proxyHttps(){
 
 // request done
 function requestHandler(options){
+  // filter
+  if (config && config.filter && config.filter.length) {
+    if ( config.filter.indexOf(options.req.headers.host)===-1 ) {
+      return;
+    }
+  }
   options = options || {};
   if (options.err) {
     if (options.err.code === 'ETIMEDOUT' && options.err.connect === true){
