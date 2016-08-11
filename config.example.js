@@ -22,6 +22,13 @@ var rules = [
     }
   },
 
+  // Combo服务代理
+  {
+    "regxCombo": "http://vm.gtimg.cn/c/=/tencentvideo/txp/js/([^?]+)",
+    "replacePath": "\/tencentvideo\/txp\/js\/",
+    "localPath": "/path/to/local/folder/"
+  },
+
   // 代理远程url到另外一个url
   {
     remoteUrl: 'http://vm.gtimg.cn/tencentvideo/script/vplay/variety/vplay.variety_797c94.min.js',
@@ -73,9 +80,14 @@ var noProxy = [
   'gtimg.cn'
 ];
 
+var filter = [
+  'imgcache.qq.com'
+];
+
 module.exports = {
   rules: rules,
   hosts: hosts,
   headers: headers,
+  filter: filter,
   noProxy: noProxy
 };
