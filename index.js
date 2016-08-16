@@ -48,6 +48,43 @@ var HTTPS_KEY = path.join(__dirname, 'data', 'key.pem');
 var HTTPS_CERT = path.join(__dirname, 'data', 'cert.pem');
 var configFilePath = './config.js';
 
+
+// ----------------- socket.io -----------------
+var Msg;
+(function(){
+
+
+var app = require('http').createServer(handler)
+var io = require('socket.io')(app);
+var fs = require('fs');
+
+app.listen(9000);
+
+function handler (req, res) {
+  fs.readFile(__dirname + '/index.html',
+  function (err, data) {
+    if (err) {
+      res.writeHead(500);
+      return res.end('Error loading index.html');
+    }
+
+    res.writeHead(200);
+    res.end(data);
+  });
+}
+
+io.on('connection', function (socket) {
+  Msg = socket;
+  // socket.emit('news', { hello: 'world' });
+  // socket.on('my other event', function (data) {
+  //   console.log(data);
+  // });
+});
+
+})();
+
+// ----------------- socket.io -----------------
+
 // 监听配置文件变化
 function watchConfigUpdate(options){
   options = options || {};
@@ -111,6 +148,7 @@ function createHttpsServer(){
 }
 
 function app(req, res){
+  console.log(req.url);
   // 处理https req.url
   if (req.type==='https') {
     req.url = 'https://' + req.headers.host + req.url;
@@ -122,15 +160,41 @@ function app(req, res){
     res.end([
       '<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui" />',
       '<h2>hello browser proxy</h2>',
-      '<p>Install Certificate <a href="/cert.pem">Click Here</a></p>'
+      '<p>Install Certificate <a href="/cert.pem">Click Here</a></p>',
+      '<p>Request Panel <a href="/pannel/">Click Here</a></p>',
     ].join(''));
     return;
   }
+
+  if ( req.headers.host.indexOf('127.0.0.1')===0 && req.url.indexOf('/pannel/')===0 ) {
+    if (req.url==='/pannel/') {
+      res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
+      res.end( fs.readFileSync('pannel/index.html', 'utf-8') );
+      return;
+    }else{
+      var fnRegx = /\/pannel\/([^\?]+)/;
+      var fnRet = fnRegx.exec(req.url);
+      if (fnRet && fnRet[1]) {
+        fnRet[1] = 'pannel/' + fnRet[1];
+        res.end( fs.readFileSync(fnRet[1], 'utf-8') );
+        return;
+      }
+    }
+  }
+
+
   // 证书下载链接
   if (req.url==='/cert.pem') {
     res.writeHead(200, {'Content-Type':'application/octet-stream'});
     res.end( fs.readFileSync('./data/cert.pem') );
     return;
+  }
+
+  if (Msg && Msg.emit) {
+    Msg.emit('news', {
+      url: req.url,
+      headers: req.headers
+    });
   }
 
   var inRules = false;

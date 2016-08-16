@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Browser-Proxy UI Panner</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Browser-Proxy UI Panner</h1>
+<script src="index.js"></script>
+
+
+<script src="http://127.0.0.1:9000/socket.io/socket.io.js"></script>
+<script>
+  var socket = io('http://localhost:9000');
+  socket.on('news', function (data) {
+    console.log(data);
+    socket.emit('my other event', { my: 'data' });
+  });
+</script>
+</body>
+</html>
