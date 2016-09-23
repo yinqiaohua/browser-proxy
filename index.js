@@ -32,9 +32,10 @@ util.showLog([
     'app support config:'.bold,
     '* browser-proxy -p 8888'.underline,
     '* browser-proxy -c ./config.js'.underline,
+    '---------- READ ME ----------\n\n',
     ''
   ].join('\n')
-, 'bgYellow.red']);
+, 'green']);
 
 if (process.env.http_proxy_browser) {
   R = R.defaults({'proxy':process.env.http_proxy_browser});
@@ -61,7 +62,14 @@ var fs = require('fs');
 app.listen(9000);
 
 function handler (req, res) {
-  fs.readFile(__dirname + '/index.html',
+  var filepath;
+  if (req.url.indexOf('/')===0) {
+    filepath = req.url;
+  }else{
+    return;
+  }
+
+  fs.readFile(__dirname + '/pannel' + filepath,
   function (err, data) {
     if (err) {
       res.writeHead(500);
@@ -75,10 +83,6 @@ function handler (req, res) {
 
 io.on('connection', function (socket) {
   Msg = socket;
-  // socket.emit('news', { hello: 'world' });
-  // socket.on('my other event', function (data) {
-  //   console.log(data);
-  // });
 });
 
 })();
@@ -147,12 +151,20 @@ function createHttpsServer(){
   proxyHttps();
 }
 
+function GUID(len){
+  len = len || 32;
+  var guid = "";
+  for (var i = 1; i <= len; i++) {
+    var n = Math.floor(Math.random() * 16.0).toString(16);
+    guid += n;
+  }
+  return guid;
+}
+
 function app(req, res){
-  console.log(req.url);
   // 处理https req.url
   if (req.type==='https') {
     req.url = 'https://' + req.headers.host + req.url;
-    console.log(req.url);
   }
   // 返回 http://127.0.0.1:port html页面，提供安装证书入口
   if (req.url==='/') {
@@ -182,6 +194,8 @@ function app(req, res){
     }
   }
 
+  var sid = GUID();
+
 
   // 证书下载链接
   if (req.url==='/cert.pem') {
@@ -191,8 +205,9 @@ function app(req, res){
   }
 
   if (Msg && Msg.emit) {
-    Msg.emit('news', {
+    Msg.emit('request', {
       url: req.url,
+      id: sid,
       headers: req.headers
     });
   }
@@ -379,6 +394,9 @@ function sendRequest(req, res, urlParse, item, headers){
     requestConfig.headers['User-Agent'] = config.defaultHeaders['User-Agent'];
   }
 
+  if (req.url.indexOf('livew.l.qq.com')>-1 ) {
+    console.log(requestConfig);
+  }
   if (req.method === 'GET') {
     request.get(requestConfig, function(err,response, body){
       requestHandler({
@@ -420,7 +438,7 @@ function proxyHttps(){
 
     netClient.on('connect', function(){
       socket.write( "HTTP/1.1 200 Connection established\r\nProxy-agent: Netscape-Proxy/1.1\r\n\r\n");
-      console.log(req.url);
+      // console.log(req.url);
     });
 
     socket.on('data', function(chunk){

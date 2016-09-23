@@ -7,16 +7,29 @@
 </head>
 <body>
 
-<h1>Browser-Proxy UI Panner</h1>
-<script src="index.js"></script>
+<div>
+  <ul class="table-header">
+    <li class="data-index">#</li>
+    <li class="data-status">Result</li>
+    <li class="data-protocol">Protocol</li>
+    <li class="data-host">Host</li>
+    <li class="data-url">URL</li>
+  </ul>
+  <ul class="table-data" id="data-list"></ul>
+</div>
+
+<script src="./jquery.min.js"></script>
+<script src="./index.js"></script>
 
 
 <script src="http://127.0.0.1:9000/socket.io/socket.io.js"></script>
 <script>
+  var lastData;
   var socket = io('http://localhost:9000');
-  socket.on('news', function (data) {
-    console.log(data);
-    socket.emit('my other event', { my: 'data' });
+  socket.on('request', function (data) {
+    lastData = data;
+    updateRequestData(data);
+    // socket.emit('my other event', { my: 'data' });
   });
 </script>
 </body>

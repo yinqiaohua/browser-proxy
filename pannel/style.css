@@ -1,3 +1,100 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+/*.data-table{
+  border-collapse: collapse;
+  width: 100%;
+  border: solid #EFEFEF 1px;
+  float: left;
+  position: fixed;
+  top: 0;
+  overflow: scroll;
+}
+.data-table tr{
+  cursor: pointer;
+}
+.data-table td{
+  padding: 6px 5px;
+}
+.data-table tr:nth-child(even){
+  background-color: #EFEFEF;
+}
+.data-table tr:nth-child(odd){
+  background-color: #FFF;
+}
+.data-table td{
+  overflow: hidden;
+}
+.data-table tr.selected{
+  background-color: #9370DB;
+}*/
+
 body{
-  background: gray;
+  padding: 20px;
+  overflow-x: hidden;
+}
+.table-header{
+  position: fixed;
+  background-color: #FFF;
+  z-index: 10;
+  height: 40px;
+  line-height: 40px;
+  top: 0;
+}
+.table-data{
+  position: absolute;
+  top: 50px;
+  overflow-y: scroll;
+}
+
+
+.table-header,
+.table-header li,
+.table-data,
+.table-data li{
+  list-style: none;
+}
+.table-header,
+.table-data{
+  width: 100%;
+  float: left;
+}
+.table-header li{
+  float: left;
+  font-weight: bold;
+}
+.data-index{
+  width: 50px;
+}
+.data-status{
+  width: 80px;
+}
+.data-protocol{
+  width: 80px;
+}
+.data-host{
+  width: 200px;
+}
+
+.table-data li{
+  cursor: pointer;
+}
+.table-data li:nth-child(even){
+  background-color: #EFEFEF;
+}
+.table-data li:nth-child(odd){
+  background-color: #FFF;
+}
+.table-data li.selected{
+  background-color: #9370DB;
+}
+
+
+.table-data span{
+  display: inline-block;
+  max-width: 700px;
+  height: 25px;
+  line-height: 25px;
+  overflow: hidden;
 }
