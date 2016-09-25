@@ -3,34 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <title>Browser-Proxy UI Panner</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/bootstrap.css" />
+<link rel="stylesheet" href="css/xenon-core.css" />
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div>
-  <ul class="table-header">
-    <li class="data-index">#</li>
-    <li class="data-status">Result</li>
-    <li class="data-protocol">Protocol</li>
-    <li class="data-host">Host</li>
-    <li class="data-url">URL</li>
-  </ul>
-  <ul class="table-data" id="data-list"></ul>
+
+
+<div class="panel panel-default detail-layer-pannel" id="layer-pannel" style="display: none;">
+  <div class="panel-heading">
+    <h3 class="panel-title">Request Detail Pannel</h3>
+    <div class="panel-options">
+      <a href="javascript:;" id="close-layer-dialog">×</a>
+    </div>
+
+  </div>
+  <div class="panel-body">
+    <div id="example-4_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
+      <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-7">
+          <div class="DTTT_container">
+            <a class="DTTT_button"><span>Request Headers</span></a>
+            <a class="DTTT_button"><span>Request Params</span></a>
+            <a class="DTTT_button"><span>Request Cookies</span></a>
+
+            <a class="DTTT_button"><span>Response Headers</span></a>
+            <a class="DTTT_button"><span>Response Content</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div id="response-pannel">
+        
+      </div>
+    </div>
+  </div>
+
 </div>
 
+<table class="table table-small-font table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Result</th>
+      <th>Protocol</th>
+      <th>Host</th>
+      <th>URL</th>
+    </tr>
+  </thead>
+  <tbody id="data-list"></tbody>
+</table>
+
+
+<script id="tpl-req-headers" type="text/html">
+<table class="table table-condensed">
+  <caption>request headers2</caption>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{each reqHd as value index}}
+    <tr>
+      <td style="min-width: 200px">{{index}}</td>
+      <td class="wd-break">{{value}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<table class="table table-condensed">
+  <caption>response headers2</caption>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{each resHd as value index}}
+    <tr>
+      <td style="min-width: 200px">{{index}}</td>
+      <td class="wd-break">{{value}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<div class="response-body">
+  <h1>response body</h1>
+  <div>
+    <pre>{{body}}</pre>
+  </div>
+</div>
+</script>
+
+
 <script src="./jquery.min.js"></script>
+<script src="./js/arttemplate.js"></script>
 <script src="./index.js"></script>
 
 
 <script src="http://127.0.0.1:9000/socket.io/socket.io.js"></script>
 <script>
-  var lastData;
-  var socket = io('http://localhost:9000');
-  socket.on('request', function (data) {
-    lastData = data;
-    updateRequestData(data);
-    // socket.emit('my other event', { my: 'data' });
-  });
+var lastData;
+var socket = io('http://localhost:9000');
+socket.on('request', function (data) {
+  lastData = data;
+  updateRequestData(data);
+});
+
+socket.on('response', function (data) {
+  updateResponseData(data);
+});
 </script>
 </body>
 </html>

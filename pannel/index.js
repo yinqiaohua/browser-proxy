@@ -11,31 +11,39 @@ function updateRequestData(data){
   session.data [ data.id ] = data;
   var HostData = getUrlHostData(data.url);
   var html = [
-    '<li data-id="'+data.id+'">',
+    '<tr data-id="'+data.id+'">',
 
-    '<span class="data-index">',
+    '<td class="data-index">',
       session.index,
-    '</span>',
+    '</td>',
 
-    '<span class="data-status">',
+    '<td class="data-status">',
       200,
-    '</span>',
+    '</td>',
 
-    '<span class="data-protocol">',
+    '<td class="data-protocol">',
       HostData.protocol,
-    '</span>',
+    '</td>',
 
-    '<span class="data-host">',
+    '<td class="data-host">',
       HostData.hostname,
-    '</span>',
+    '</td>',
 
-    '<span class="data-url">',
+    '<td class="data-url">',
       HostData.pathname,
-    '</span>',
+    '</td>',
 
-    '</li>'
+    '</tr>'
   ].join('');
   $(html).appendTo($list);
+}
+
+function updateResponseData(data){
+  if ( !(data && data.sid) ) return;
+  var sid = data.sid;
+  if ( !(session.data && session.data[sid]) )  return;
+  session.data[sid]['resHeaders'] = data.resHeaders;
+  session.data[sid]['body'] = data.body;
 }
 
 function getUrlHostData(url){
@@ -78,24 +86,33 @@ function clearDataList(){
 $('#data-list').on('click', function(e){
   var tar = e.target;
   var $this;
-  if (tar.nodeName.toLowerCase()==='li') {
+  var sid;
+  if (tar.nodeName.toLowerCase()==='tr') {
     $this = $(tar);
   }else{
-    $this = $(e.target).parents('li');
+    $this = $(e.target).parents('tr');
   }
   $this.addClass('selected').siblings().removeClass('selected');
-})
-.on('dblclick', function(e){
-  var tar = e.target;
-  if (tar.nodeName.toLowerCase()==='li') {
-    $this = $(tar);
-  }else{
-    $this = $(e.target).parents('li');
-  }
-  alert( $this.attr('data-id') )
+  sid = $this.attr('data-id');
+  showResponse(sid);
 });
 
+function showResponse(sid){
+  var listData = session.data[sid];
+  if (!listData) return;
+  var html = template('tpl-req-headers', {
+    resHd: listData.resHeaders,
+    reqHd: listData.reqHeaders,
+    body: listData.body
+  });
+  document.getElementById('response-pannel').innerHTML = html;
+  $('#layer-pannel').show();
+}
+function closeLayer(){
+  $('#layer-pannel').hide();
+}
 
+// hot key
 $(document).on('keydown', function(e){
   console.log(e.keyCode);
   if (e.shiftKey && e.keyCode === 88) {
@@ -108,5 +125,13 @@ $(document).on('keydown', function(e){
     if (e.keyCode===40) {
       selectDown();
     }
+    if (e.keyCode===27) {
+      closeLayer();
+    }
   }
-})
+});
+
+// click
+$('#close-layer-dialog').on('click', function(){
+  closeLayer();
+});

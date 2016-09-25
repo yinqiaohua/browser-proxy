@@ -21,6 +21,7 @@ var config = {};
 var colors = require('colors');
 var path = require('path');
 var chokidar = require('chokidar');
+var zlib = require('zlib');
 
 util.showLog([
   [
@@ -63,6 +64,9 @@ app.listen(9000);
 
 function handler (req, res) {
   var filepath;
+  if (req.url==='/') {
+    req.url = '/index.html';
+  }
   if (req.url.indexOf('/')===0) {
     filepath = req.url;
   }else{
@@ -115,6 +119,7 @@ function watchConfigUpdate(options){
 }
 
 
+// 入口
 function startServer(options){
   options = options || {};
   AppPort = options['-p'] || AppPort;
@@ -127,6 +132,7 @@ function startServer(options){
   createHttpsServer();
 }
 
+// 创建代理服务器－http
 function createHttpServer(options){
   httpServer = http.createServer(function(req, res){
     app(req, res);
@@ -135,6 +141,7 @@ function createHttpServer(options){
   util.showLog(['Txplayer Browser Debug Proxy: ', 'green'], ['http://127.0.0.1:'+options.AppPort, 'red.underline']);
 }
 
+// 创建代理服务器－https
 function createHttpsServer(){
   httpsServer = https.createServer({
     key: fs.readFileSync(HTTPS_KEY),
@@ -195,6 +202,7 @@ function app(req, res){
   }
 
   var sid = GUID();
+  req.__sid__ = sid;
 
 
   // 证书下载链接
@@ -204,11 +212,15 @@ function app(req, res){
     return;
   }
 
+  // delte 清除缓存
+  delete req.headers['cache-control'];
+  delete req.headers['if-modified-since'];
   if (Msg && Msg.emit) {
     Msg.emit('request', {
       url: req.url,
       id: sid,
-      headers: req.headers
+      method: req.method,
+      reqHeaders: req.headers
     });
   }
 
@@ -353,6 +365,17 @@ function app(req, res){
   }
 }
 
+function responseEmit(data){
+  var param = {};
+  param.sid = data.sid;
+  param.resHeaders = data.res.headers;
+  if (data.body) {
+    param.body = data.body;
+  }
+  if (Msg && Msg.emit) {
+    Msg.emit('response', param);
+  }
+}
 
 // do request action
 function sendRequest(req, res, urlParse, item, headers){
@@ -394,22 +417,75 @@ function sendRequest(req, res, urlParse, item, headers){
     requestConfig.headers['User-Agent'] = config.defaultHeaders['User-Agent'];
   }
 
-  if (req.url.indexOf('livew.l.qq.com')>-1 ) {
-    console.log(requestConfig);
-  }
+  var chunks = [];
+  var encoding;
+  var inTextContentType = function(requestConfig){
+    if (
+      requestConfig && 
+      requestConfig.headers && 
+      requestConfig.headers['accept'] &&
+      /[text|html|xhtml|css|javascript|json|xml]+/i.test(requestConfig.headers['accept']+'') 
+      && !/[svg|image|mp4|video|png]/i.test(requestConfig.headers['accept']+'')
+    ) {
+      return true;
+    }
+    if (
+      urlParse && 
+      urlParse.pathname &&
+      /\.[js|css|json]+$/.test(urlParse.pathname)
+    ) {
+      return true;
+    }
+
+
+    return false;
+  };
   if (req.method === 'GET') {
-    request.get(requestConfig, function(err,response, body){
-      requestHandler({
-        req: req,
-        err: err,
-        response: response,
-        body: body,
-        useHOST: useHOST,
-        requestConfig: requestConfig,
-        colors: item.colors
-      });
-    })
-    .pipe(res)
+    var emitData = function(response, body){
+      var _data = {};
+      _data.res = response;
+      _data.sid = req.__sid__;
+      if (body) _data.body = body;
+      responseEmit(_data);
+    }
+
+    // request.get(requestConfig, function(err,response, body){
+    //   // emitData(response);
+    // }).pipe(res);
+    // return;
+
+    var isGetRequestResponseText = inTextContentType(requestConfig);
+    // console.log('isGetRequestResponseText=' + isGetRequestResponseText, req.url);
+    if ( isGetRequestResponseText===true ) {
+      request.get(requestConfig, function(err,response, body){
+        encoding = response.headers['content-encoding'];
+        // console.log( 'encoding='.green + (encoding+'').green );
+        if (encoding==='gzip') {
+          var buffer = Buffer.concat(chunks);
+          zlib.gunzip(buffer, function (err, decoded) {
+            if (err) {
+              console.log(err);
+              return;
+            }
+            var data = decoded.toString();
+            emitData(response, data);
+          });
+        }
+        else{
+          emitData(response, body);
+        }
+      })
+      .on('data', function(chunk){
+        chunks.push(chunk);
+      })
+      .pipe(res);
+    }else{
+      // console.log( (req.url+'').red );
+      request.get(requestConfig, function(err,response, body){
+        emitData(response);
+      }).pipe(res);
+      return;
+    }
   }else{
     // get post body
     var postBody = [];
@@ -419,14 +495,18 @@ function sendRequest(req, res, urlParse, item, headers){
     req.on('end', function () {
       requestConfig.form = postBody.join('');
       request.post(requestConfig, function(err,response, body){
-        requestHandler({
-          req: req,
-          err: err,
-          response: response,
-          body: body,
-          useHOST: useHOST,
-          requestConfig: requestConfig
+        responseEmit({
+          res: response,
+          sid: req.__sid__
         });
+        // requestHandler({
+        //   req: req,
+        //   err: err,
+        //   response: response,
+        //   body: body,
+        //   useHOST: useHOST,
+        //   requestConfig: requestConfig
+        // });
       }).pipe(res)
     });
   }
@@ -470,76 +550,6 @@ function proxyHttps(){
     });
   });
 };
-
-
-// request done
-function requestHandler(options){
-  // filter
-  if (config && config.filter && config.filter.length) {
-    if ( config.filter.indexOf(options.req.headers.host)===-1 ) {
-      return;
-    }
-  }
-  options = options || {};
-  if (options.err) {
-    if (options.err.code === 'ETIMEDOUT' && options.err.connect === true){
-      util.showLog(
-        [util.dateFormat(), 'red'],
-        [options.req.method, 'red'],
-        [options.err.code, 'red'],
-        [options.req.url, 'red']
-      );
-    }
-  }else{
-    options.response.statusCode = (options.response.statusCode+'') || '';
-    if ( /^4/.test(options.response.statusCode) || /^5/.test(options.response.statusCode) ){
-      util.showLog(
-        [util.dateFormat(), 'red'],
-        [options.req.method, 'red'],
-        [options.response.statusCode, 'red'],
-        [options.req.url, 'red']
-      );
-    }else{
-      if (options.colors) {
-        util.showLog(
-          [util.dateFormat(), options.colors],
-          [options.req.method, options.colors],
-          [options.response.statusCode, options.colors],
-          [options.req.headers.host, options.colors],
-          [options.requestConfig.hostname||'',options.colors],
-          [options.req.url, options.colors]
-        );
-        function decodeShowUrlParam(a){
-          var b = URL.parse(a);
-          if (!b || !b.query) return;
-          var c = b.query.split('&').join('\n');
-          var d = decodeURIComponent( c );
-          util.showLog([d, options.colors]);
-        }
-        decodeShowUrlParam(options.req.url);
-      }
-      else if (options.useHOST) {
-        util.showLog(
-          [util.dateFormat(), 'green'],
-          [options.req.method, 'green'],
-          [options.response.statusCode, 'green'],
-          [options.req.headers.host, 'blue.bold.underline'],
-          [options.requestConfig.hostname||'','blue.bold.underline'],
-          [options.req.url, 'blue.bold.underline']
-        );
-      }else{
-        util.showLog(
-          [util.dateFormat(), 'green'],
-          [options.req.method, 'green'],
-          [options.response.statusCode, 'green'],
-          [options.req.headers.host, 'gray.bold'],
-          [options.requestConfig.hostname||'','gray.bold.underline'],
-          [options.req.url, 'gray']
-        );
-      }
-    }
-  }
-}
 
 function getUrlParam(p, u) {
   var reg = new RegExp("(^|&|\\\\?)" + p + "=([^&]*)(&|$|#)"),
