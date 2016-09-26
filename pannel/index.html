@@ -20,6 +20,7 @@
 
   </div>
   <div class="panel-body">
+    <h3 id="response-url-title" class="response-url-title"></h3>
     <div id="example-4_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
       <div class="row">
         <div class="col-sm-5"></div>
@@ -36,11 +37,10 @@
       </div>
 
       <div id="response-pannel">
-        
+
       </div>
     </div>
   </div>
-
 </div>
 
 <table class="table table-small-font table-bordered table-striped">
@@ -51,15 +51,35 @@
       <th>Protocol</th>
       <th>Host</th>
       <th>URL</th>
+      <th>ServerIp</th>
+      <th>TimeSpend</th>
     </tr>
   </thead>
   <tbody id="data-list"></tbody>
 </table>
 
+<!-- request url list template start -->
+<script id="tpl-req-list" type="text/html">
+{{if useHost}}
+<tr class="tr-host-selected" data-id="{{id}}">
+{{else}}
+<tr data-id="{{id}}">
+{{/if}}
+  <td class="data-index">{{index}}</td>
+  <td class="data-status">{{status}}</td>
+  <td class="data-protocol">{{protocol}}</td>
+  <td class="data-host">{{host}}</td>
+  <td class="data-url">{{url}}</td>
+  <td class="data-serverip"></td>
+  <td class="data-timespend">{{serverip}}</td>
+</tr>
+</script>
+<!-- request url list template end -->
 
+<!-- response template start -->
 <script id="tpl-req-headers" type="text/html">
 <table class="table table-condensed">
-  <caption>request headers2</caption>
+  <caption>request headers</caption>
   <thead>
     <tr>
       <th>Key</th>
@@ -77,7 +97,7 @@
 </table>
 
 <table class="table table-condensed">
-  <caption>response headers2</caption>
+  <caption>response headers</caption>
   <thead>
     <tr>
       <th>Key</th>
@@ -101,6 +121,7 @@
   </div>
 </div>
 </script>
+<!-- response template end -->
 
 
 <script src="./jquery.min.js"></script>

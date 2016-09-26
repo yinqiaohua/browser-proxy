@@ -10,31 +10,47 @@ function updateRequestData(data){
   }
   session.data [ data.id ] = data;
   var HostData = getUrlHostData(data.url);
-  var html = [
-    '<tr data-id="'+data.id+'">',
+  // var html = [
+  //   '<tr data-id="'+data.id+'" class="tr-host-selected">',
 
-    '<td class="data-index">',
-      session.index,
-    '</td>',
+  //   '<td class="data-index">',
+  //     session.index,
+  //   '</td>',
 
-    '<td class="data-status">',
-      200,
-    '</td>',
+  //   '<td class="data-status">',
+  //     200,
+  //   '</td>',
 
-    '<td class="data-protocol">',
-      HostData.protocol,
-    '</td>',
+  //   '<td class="data-protocol">',
+  //     HostData.protocol,
+  //   '</td>',
 
-    '<td class="data-host">',
-      HostData.hostname,
-    '</td>',
+  //   '<td class="data-host">',
+  //     HostData.hostname,
+  //   '</td>',
 
-    '<td class="data-url">',
-      HostData.pathname,
-    '</td>',
+  //   '<td class="data-url">',
+  //     HostData.pathname,
+  //   '</td>',
 
-    '</tr>'
-  ].join('');
+  //   '<td class="data-serverip">',
+  //     data.hostname,
+  //   '</td>',
+
+  //   '<td class="data-timespend"></td>',
+
+  //   '</tr>'
+  // ].join('');
+  var html = template('tpl-req-list', {
+    index: session.index,
+    status: '',
+    protocol: HostData.protocol,
+    host: HostData.hostname,
+    url: HostData.pathname,
+    serverip: data.hostname,
+    id: data.id,
+    useHOST: ''
+  });
   $(html).appendTo($list);
 }
 
@@ -44,6 +60,14 @@ function updateResponseData(data){
   if ( !(session.data && session.data[sid]) )  return;
   session.data[sid]['resHeaders'] = data.resHeaders;
   session.data[sid]['body'] = data.body;
+  session.data[sid]['useHOST'] = !!data.useHOST;
+  session.data[sid]['hostname'] = data.hostname;
+  session.data[sid]['reqEndTime'] = data.reqEndTime;
+  $('[data-id=' + sid + '] td.data-serverip').html( data.hostname );
+  $('[data-id=' + sid + '] td.data-timespend').html( session.data[sid].reqEndTime- session.data[sid].reqStartTime );
+  if (data.useHOST) {
+    $('[data-id=' + sid + ']').addClass('tr-host-selected');
+  }
 }
 
 function getUrlHostData(url){
@@ -107,6 +131,7 @@ function showResponse(sid){
   });
   document.getElementById('response-pannel').innerHTML = html;
   $('#layer-pannel').show();
+  $('#response-url-title').html( listData.method + '&nbsp;&nbsp;' + listData.url );
 }
 function closeLayer(){
   $('#layer-pannel').hide();
@@ -114,7 +139,6 @@ function closeLayer(){
 
 // hot key
 $(document).on('keydown', function(e){
-  console.log(e.keyCode);
   if (e.shiftKey && e.keyCode === 88) {
     clear();
   }

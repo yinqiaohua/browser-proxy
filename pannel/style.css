@@ -27,3 +27,10 @@ body{
   width: 100%;
   float: left;
 }
+.response-url-title{
+  background: #f5f5dc none repeat scroll 0 0;
+  padding: 12px;
+}
+tr.tr-host-selected,tr.tr-host-selected td{
+  background-color: #7CFC00 !important;
+}

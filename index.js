@@ -52,6 +52,7 @@ var configFilePath = './config.js';
 
 
 // ----------------- socket.io -----------------
+// UI面板
 var Msg;
 (function(){
 
@@ -185,22 +186,6 @@ function app(req, res){
     return;
   }
 
-  if ( req.headers.host.indexOf('127.0.0.1')===0 && req.url.indexOf('/pannel/')===0 ) {
-    if (req.url==='/pannel/') {
-      res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-      res.end( fs.readFileSync('pannel/index.html', 'utf-8') );
-      return;
-    }else{
-      var fnRegx = /\/pannel\/([^\?]+)/;
-      var fnRet = fnRegx.exec(req.url);
-      if (fnRet && fnRet[1]) {
-        fnRet[1] = 'pannel/' + fnRet[1];
-        res.end( fs.readFileSync(fnRet[1], 'utf-8') );
-        return;
-      }
-    }
-  }
-
   var sid = GUID();
   req.__sid__ = sid;
 
@@ -220,7 +205,8 @@ function app(req, res){
       url: req.url,
       id: sid,
       method: req.method,
-      reqHeaders: req.headers
+      reqHeaders: req.headers,
+      reqStartTime: (+new Date)
     });
   }
 
@@ -329,11 +315,6 @@ function app(req, res){
     // 代理到本地文件
     else if (content) {
       // Match Rule Color Theme
-      util.showLog(
-        [util.dateFormat(), 'green'],
-        [req.method, 'green'],
-        [req.url, 'yellow.underline']
-      );
       res.writeHead(item.httpResponseCode || 200, resHeaders);
       if (item && item.useJSONPCallback) {
         var jsonpcallback = getUrlParam('callback', req.url);
@@ -345,12 +326,6 @@ function app(req, res){
     }
     // 代理到本地文件不存在
     else if(!isFileExist){
-      util.showLog(
-        [util.dateFormat(), 'red'],
-        [req.method, 'red'],
-        ['[local file not found]', 'red'],
-        [req.url, 'red.underline']
-      );
       res.writeHead(404, resHeaders);
       res.end();
     }
@@ -372,6 +347,9 @@ function responseEmit(data){
   if (data.body) {
     param.body = data.body;
   }
+  param.useHOST = data.useHOST;
+  param.hostname = data.hostname;
+  param.reqEndTime = (+new Date);
   if (Msg && Msg.emit) {
     Msg.emit('response', param);
   }
@@ -379,6 +357,7 @@ function responseEmit(data){
 
 // do request action
 function sendRequest(req, res, urlParse, item, headers){
+  console.log('request url', req.url);
   item = item || {};
   headers = headers || {};
   var request = r, useHOST = false;
@@ -418,49 +397,32 @@ function sendRequest(req, res, urlParse, item, headers){
   }
 
   var chunks = [];
-  var encoding;
-  var inTextContentType = function(requestConfig){
-    if (
-      requestConfig && 
-      requestConfig.headers && 
-      requestConfig.headers['accept'] &&
-      /[text|html|xhtml|css|javascript|json|xml]+/i.test(requestConfig.headers['accept']+'') 
-      && !/[svg|image|mp4|video|png]/i.test(requestConfig.headers['accept']+'')
+
+  var showResponseText = function(headers){
+    if (headers &&
+      headers['content-type'] &&
+      /text|html|xhtml|css|javascript|json|xml/i.test(headers['content-type'])
+      && !/svg|image|mp4|video|png|gif/i.test(headers['content-type'])
     ) {
       return true;
     }
-    if (
-      urlParse && 
-      urlParse.pathname &&
-      /\.[js|css|json]+$/.test(urlParse.pathname)
-    ) {
-      return true;
-    }
-
-
     return false;
+  }
+  var emitData = function(response, body){
+    var _data = {};
+    _data.res = response;
+    _data.sid = req.__sid__;
+    if (body) _data.body = body;
+    _data.useHOST = !!useHOST;
+    _data.hostname = requestConfig.hostname;
+    responseEmit(_data);
   };
   if (req.method === 'GET') {
-    var emitData = function(response, body){
-      var _data = {};
-      _data.res = response;
-      _data.sid = req.__sid__;
-      if (body) _data.body = body;
-      responseEmit(_data);
-    }
-
-    // request.get(requestConfig, function(err,response, body){
-    //   // emitData(response);
-    // }).pipe(res);
-    // return;
-
-    var isGetRequestResponseText = inTextContentType(requestConfig);
-    // console.log('isGetRequestResponseText=' + isGetRequestResponseText, req.url);
-    if ( isGetRequestResponseText===true ) {
-      request.get(requestConfig, function(err,response, body){
-        encoding = response.headers['content-encoding'];
-        // console.log( 'encoding='.green + (encoding+'').green );
-        if (encoding==='gzip') {
+    request.get(requestConfig, function(err,response, body){
+      if (err || !(response && response.headers) ) return;
+      if ( showResponseText(response.headers) ) {
+        // 解压zip
+        if (response.headers['content-encoding']==='gzip') {
           var buffer = Buffer.concat(chunks);
           zlib.gunzip(buffer, function (err, decoded) {
             if (err) {
@@ -470,22 +432,18 @@ function sendRequest(req, res, urlParse, item, headers){
             var data = decoded.toString();
             emitData(response, data);
           });
-        }
-        else{
+        }else{
           emitData(response, body);
         }
-      })
-      .on('data', function(chunk){
-        chunks.push(chunk);
-      })
-      .pipe(res);
-    }else{
-      // console.log( (req.url+'').red );
-      request.get(requestConfig, function(err,response, body){
-        emitData(response);
-      }).pipe(res);
-      return;
-    }
+      }
+      else{
+        emitData(response, '');
+      }
+    })
+    .on('data', function(chunk){
+      chunks.push(chunk);
+    })
+    .pipe(res);
   }else{
     // get post body
     var postBody = [];
@@ -495,18 +453,6 @@ function sendRequest(req, res, urlParse, item, headers){
     req.on('end', function () {
       requestConfig.form = postBody.join('');
       request.post(requestConfig, function(err,response, body){
-        responseEmit({
-          res: response,
-          sid: req.__sid__
-        });
-        // requestHandler({
-        //   req: req,
-        //   err: err,
-        //   response: response,
-        //   body: body,
-        //   useHOST: useHOST,
-        //   requestConfig: requestConfig
-        // });
       }).pipe(res)
     });
   }
@@ -561,6 +507,7 @@ function getUrlParam(p, u) {
   return "";
 }
 
+// 解析配置文件host设置
 function parseHost(){
   hostText = util.getCodeFromNote(config.hosts);
   config.hosts = {};
