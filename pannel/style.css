@@ -34,3 +34,6 @@ body{
 tr.tr-host-selected,tr.tr-host-selected td{
   background-color: #7CFC00 !important;
 }
+tr.tr-status-400,tr.tr-status-400 td{
+  color: red !important;
+}

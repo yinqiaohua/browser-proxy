@@ -350,6 +350,8 @@ function responseEmit(data){
   param.useHOST = data.useHOST;
   param.hostname = data.hostname;
   param.reqEndTime = (+new Date);
+  param.postBody = data.postBody;
+  param.statusCode = data.statusCode;
   if (Msg && Msg.emit) {
     Msg.emit('response', param);
   }
@@ -402,19 +404,21 @@ function sendRequest(req, res, urlParse, item, headers){
     if (headers &&
       headers['content-type'] &&
       /text|html|xhtml|css|javascript|json|xml/i.test(headers['content-type'])
-      && !/svg|image|mp4|video|png|gif/i.test(headers['content-type'])
+      && !/svg|image|mp4|video|png|gif|shockwave-flash/i.test(headers['content-type'])
     ) {
       return true;
     }
     return false;
   }
-  var emitData = function(response, body){
+  var emitData = function(response, body, postBody){
     var _data = {};
     _data.res = response;
     _data.sid = req.__sid__;
     if (body) _data.body = body;
     _data.useHOST = !!useHOST;
     _data.hostname = requestConfig.hostname;
+    _data.postBody = postBody;
+    _data.statusCode = response.statusCode;
     responseEmit(_data);
   };
   if (req.method === 'GET') {
@@ -430,14 +434,14 @@ function sendRequest(req, res, urlParse, item, headers){
               return;
             }
             var data = decoded.toString();
-            emitData(response, data);
+            emitData(response, data, null);
           });
         }else{
-          emitData(response, body);
+          emitData(response, body, null);
         }
       }
       else{
-        emitData(response, '');
+        emitData(response, '', null);
       }
     })
     .on('data', function(chunk){
@@ -453,6 +457,7 @@ function sendRequest(req, res, urlParse, item, headers){
     req.on('end', function () {
       requestConfig.form = postBody.join('');
       request.post(requestConfig, function(err,response, body){
+        emitData(response, body, requestConfig.form);
       }).pipe(res)
     });
   }

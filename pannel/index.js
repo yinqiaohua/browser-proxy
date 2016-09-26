@@ -10,37 +10,6 @@ function updateRequestData(data){
   }
   session.data [ data.id ] = data;
   var HostData = getUrlHostData(data.url);
-  // var html = [
-  //   '<tr data-id="'+data.id+'" class="tr-host-selected">',
-
-  //   '<td class="data-index">',
-  //     session.index,
-  //   '</td>',
-
-  //   '<td class="data-status">',
-  //     200,
-  //   '</td>',
-
-  //   '<td class="data-protocol">',
-  //     HostData.protocol,
-  //   '</td>',
-
-  //   '<td class="data-host">',
-  //     HostData.hostname,
-  //   '</td>',
-
-  //   '<td class="data-url">',
-  //     HostData.pathname,
-  //   '</td>',
-
-  //   '<td class="data-serverip">',
-  //     data.hostname,
-  //   '</td>',
-
-  //   '<td class="data-timespend"></td>',
-
-  //   '</tr>'
-  // ].join('');
   var html = template('tpl-req-list', {
     index: session.index,
     status: '',
@@ -63,10 +32,17 @@ function updateResponseData(data){
   session.data[sid]['useHOST'] = !!data.useHOST;
   session.data[sid]['hostname'] = data.hostname;
   session.data[sid]['reqEndTime'] = data.reqEndTime;
-  $('[data-id=' + sid + '] td.data-serverip').html( data.hostname );
-  $('[data-id=' + sid + '] td.data-timespend').html( session.data[sid].reqEndTime- session.data[sid].reqStartTime );
+  session.data[sid]['postBody'] = data.postBody;
+  session.data[sid]['statusCode'] = data.statusCode;
+  var $sid = $('[data-id=' + sid + ']');
+  $sid.find('td.data-serverip').html( data.hostname );
+  $sid.find('td.data-status').html( data.statusCode );
+  $sid.find('td.data-timespend').html( session.data[sid].reqEndTime- session.data[sid].reqStartTime );
   if (data.useHOST) {
-    $('[data-id=' + sid + ']').addClass('tr-host-selected');
+    $sid.addClass('tr-host-selected');
+  }
+  if ( (data.statusCode+'').indexOf('4')===0 ) {
+    $sid.addClass('tr-status-400');
   }
 }
 
