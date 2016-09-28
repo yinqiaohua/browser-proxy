@@ -40,7 +40,7 @@ util.showLog([
 
 if (process.env.http_proxy_browser) {
   R = R.defaults({'proxy':process.env.http_proxy_browser});
-  util.showLog(['[Info] Current Extenal Proxy:', 'green'],[ process.env.http_proxy_browser, 'green.underline'])
+  util.showLog(['Current Extenal Proxy:', 'green'],[ process.env.http_proxy_browser, 'green.underline'])
 }
 
 var httpServer;
@@ -139,7 +139,8 @@ function createHttpServer(options){
     app(req, res);
   });
   httpServer.listen(options.AppPort);
-  util.showLog(['Txplayer Browser Debug Proxy: ', 'green'], ['http://127.0.0.1:'+options.AppPort, 'gray.underline']);
+  util.showLog(['Browser Debug Proxy: ', 'green'], ['http://127.0.0.1:'+options.AppPort, 'gray.underline']);
+  util.showLog(['Ui Pannel Open: ', 'green'], ['http://127.0.0.1:'+9000, 'gray.underline']);
 }
 
 // 创建代理服务器－https
