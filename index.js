@@ -200,6 +200,10 @@ function app(req, res){
   // delte 清除缓存
   delete req.headers['cache-control'];
   delete req.headers['if-modified-since'];
+  delete req.headers['if-none-match'];
+
+  // delete gzip
+  delete req.headers['accept-encoding'];
   if (Msg && Msg.emit) {
     Msg.emit('request', {
       url: req.url,
@@ -230,13 +234,16 @@ function app(req, res){
     var _matchFiles = [];
     var isFileExist = true;
     var basePath='';
+    var itemRegx, itemRegxStr;
     // 正则匹配
     if (item.regx) {
       if (typeof item.regx==='string'){
-        item.regx = item.regx.replace(/\//g,'\/').replace(/\./g,'\.');
-        item.regx = new RegExp(item.regx, 'ig');
+        itemRegxStr = item.regx.replace(/\//g,'\/').replace(/\./g,'\.');
+        itemRegx = new RegExp(itemRegxStr, 'ig');
+        isMatch = itemRegx.test(req.url);
+      }else{
+        isMatch = item.regx.test(req.url);
       }
-      isMatch = item.regx.test(req.url);
     }
     // indexOf 查找
     else if(item.indexof){
@@ -280,6 +287,8 @@ function app(req, res){
       isFileExist = fs.existsSync(item.localFile);
       if (isFileExist){
         content = fs.readFileSync(item.localFile, 'utf-8');
+      }else{
+        // 404 error
       }
     }
     // 本地路径 + 匹配到的文件名
@@ -288,6 +297,8 @@ function app(req, res){
       isFileExist = fs.existsSync(localFile);
       if (isFileExist){
         content = fs.readFileSync(localFile, 'utf-8');
+      }else{
+        // 404 error
       }
     }
     // 合并服务
@@ -309,25 +320,46 @@ function app(req, res){
     }
     // 指定返回http code
     if (item.httpResponseCode) {
-      res.writeHead(item.httpResponseCode, resHeaders);
-      res.end();
+      // res.writeHead(item.httpResponseCode, resHeaders);
+      // res.end();
+      handlerLocalResponse({
+        res: res,
+        req: req,
+        responseBody: content,
+        httpResponseCode: item.httpResponseCode,
+        responseHeaders: resHeaders
+      });
     }
     // 代理到本地文件
     else if (content) {
       // Match Rule Color Theme
-      res.writeHead(item.httpResponseCode || 200, resHeaders);
+      // res.writeHead(item.httpResponseCode || 200, resHeaders);
       if (item && item.useJSONPCallback) {
-        var jsonpcallback = getUrlParam('callback', req.url);
+        var jsonpcallback = util.getUrlParam('callback', req.url);
         if (jsonpcallback) {
           content = jsonpcallback + '(' + content + ')';
         }
       }
-      res.end(content);
+      // res.end(content);
+      handlerLocalResponse({
+        res: res,
+        req: req,
+        responseBody: content,
+        httpResponseCode: item.httpResponseCode || 200,
+        responseHeaders: resHeaders
+      });
     }
     // 代理到本地文件不存在
     else if(!isFileExist){
-      res.writeHead(404, resHeaders);
-      res.end();
+      // res.writeHead(404, resHeaders);
+      // res.end();
+      handlerLocalResponse({
+        req: req,
+        res: res,
+        responseBody: null,
+        httpResponseCode: 404,
+        responseHeaders: resHeaders
+      });
     }
     // 请求url并返回
     else{
@@ -340,14 +372,36 @@ function app(req, res){
   }
 }
 
+
+function handlerLocalResponse(options){
+  options.res.writeHead(options.httpResponseCode, options.responseHeaders);
+  if (options.responseBody) {
+    options.res.end(options.responseBody);
+  }else{
+    options.res.end();
+  }
+  var emitData = {
+    sid: options.req.__sid__,
+    url: options.req.url,
+    resHeaders: options.responseHeaders,
+    body: options.responseBody,
+    statusCode: options.httpResponseCode,
+    mapLocal: true
+  };
+  responseEmit(emitData);
+}
+
 function responseEmit(data){
   var param = {};
   param.sid = data.sid;
-  param.resHeaders = data.res.headers;
+  if (data.res && data.res.headers) {
+    param.resHeaders = data.res.headers;
+  }
   if (data.body) {
     param.body = data.body;
   }
   param.useHOST = data.useHOST;
+  param.mapLocal = data.mapLocal;
   param.hostname = data.hostname;
   param.reqEndTime = (+new Date);
   param.postBody = data.postBody;
@@ -359,7 +413,6 @@ function responseEmit(data){
 
 // do request action
 function sendRequest(req, res, urlParse, item, headers){
-  console.log('request url', req.url);
   item = item || {};
   headers = headers || {};
   var request = r, useHOST = false;
@@ -422,6 +475,7 @@ function sendRequest(req, res, urlParse, item, headers){
     responseEmit(_data);
   };
   if (req.method === 'GET') {
+    // console.log('GET ' + req.url);
     request.get(requestConfig, function(err,response, body){
       if (err || !(response && response.headers) ) return;
       if ( showResponseText(response.headers) ) {
@@ -430,7 +484,6 @@ function sendRequest(req, res, urlParse, item, headers){
           var buffer = Buffer.concat(chunks);
           zlib.gunzip(buffer, function (err, decoded) {
             if (err) {
-              console.log(err);
               return;
             }
             var data = decoded.toString();
@@ -469,7 +522,6 @@ function proxyHttps(){
 
     netClient.on('connect', function(){
       socket.write( "HTTP/1.1 200 Connection established\r\nProxy-agent: Netscape-Proxy/1.1\r\n\r\n");
-      // console.log(req.url);
     });
 
     socket.on('data', function(chunk){
@@ -502,15 +554,6 @@ function proxyHttps(){
   });
 };
 
-function getUrlParam(p, u) {
-  var reg = new RegExp("(^|&|\\\\?)" + p + "=([^&]*)(&|$|#)"),
-    r = null;
-  r = u.match(reg);
-  if (r) {
-    return r[2];
-  }
-  return "";
-}
 
 // 解析配置文件host设置
 function parseHost(){

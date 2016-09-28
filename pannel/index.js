@@ -8,19 +8,30 @@ function updateRequestData(data){
   if ( !(data && data.url) ) {
     return;
   }
-  session.data [ data.id ] = data;
   var HostData = getUrlHostData(data.url);
-  var html = template('tpl-req-list', {
-    index: session.index,
-    status: '',
-    protocol: HostData.protocol,
-    host: HostData.hostname,
-    url: HostData.pathname,
-    serverip: data.hostname,
-    id: data.id,
-    useHOST: ''
-  });
-  $(html).appendTo($list);
+
+  session.data [ data.id ] = data;
+  session.data [ data.id ].index = session.index;
+  session.data [ data.id ].protocol = HostData.protocol;
+  session.data [ data.id ].host = HostData.hostname;
+  session.data [ data.id ].pathname = HostData.pathname;
+
+  if (
+      !session.filter ||
+     (session.filter && data.url && data.url.indexOf(session.filter)>-1)
+  ) {
+    var html = template('tpl-req-list', {
+      index: session.index,
+      status: '',
+      protocol: HostData.protocol,
+      host: HostData.hostname,
+      url: HostData.pathname,
+      serverip: data.hostname,
+      id: data.id,
+      useHOST: ''
+    });
+    $(html).appendTo($list);
+  }
 }
 
 function updateResponseData(data){
@@ -30,20 +41,43 @@ function updateResponseData(data){
   session.data[sid]['resHeaders'] = data.resHeaders;
   session.data[sid]['body'] = data.body;
   session.data[sid]['useHOST'] = !!data.useHOST;
+  session.data[sid]['mapLocal'] = !!data.mapLocal;
   session.data[sid]['hostname'] = data.hostname;
   session.data[sid]['reqEndTime'] = data.reqEndTime;
   session.data[sid]['postBody'] = data.postBody;
   session.data[sid]['statusCode'] = data.statusCode;
-  var $sid = $('[data-id=' + sid + ']');
-  $sid.find('td.data-serverip').html( data.hostname );
-  $sid.find('td.data-status').html( data.statusCode );
-  $sid.find('td.data-timespend').html( session.data[sid].reqEndTime- session.data[sid].reqStartTime );
-  if (data.useHOST) {
-    $sid.addClass('tr-host-selected');
+  session.data[sid].timespend = session.data[sid].reqEndTime- session.data[sid].reqStartTime;
+  if (data.resHeaders && data.resHeaders["content-length"]) {
+    session.data[sid]['filesize'] = formatFileSize(data.resHeaders["content-length"]);
   }
-  if ( (data.statusCode+'').indexOf('4')===0 ) {
-    $sid.addClass('tr-status-400');
+  if (
+      !session.filter ||
+     (session.filter && session.data[sid].url && session.data[sid].url.indexOf(session.filter)>-1)
+  ) {
+    var $sid = $('[data-id=' + sid + ']');
+    $sid.find('td.data-serverip').html( data.hostname );
+    $sid.find('td.data-status').html( data.statusCode );
+    $sid.find('td.data-timespend').html( session.data[sid].timespend );
+    if (data.useHOST) {
+      $sid.addClass('tr-host-selected');
+    }
+    if (data.mapLocal) {
+      $sid.addClass('tr-maplocal-selected');
+    }
+    if ( (data.statusCode+'').indexOf('4')===0 ) {
+      $sid.addClass('tr-status-400');
+    }
+    $sid.find('td.data-filesize').html( session.data[sid].filesize );
   }
+}
+function formatFileSize(fs){
+  var size = parseFloat(fs);
+  if (size > 1024) {
+    size = parseInt(size / 102.4)/10 + 'k';
+  }else{
+    size += 'b';
+  }
+  return size;
 }
 
 function getUrlHostData(url){
@@ -83,7 +117,7 @@ function clearDataList(){
   $list.html('');
 }
 
-$('#data-list').on('click', function(e){
+$('#data-list').on('dblclick', function(e){
   var tar = e.target;
   var $this;
   var sid;
@@ -92,10 +126,41 @@ $('#data-list').on('click', function(e){
   }else{
     $this = $(e.target).parents('tr');
   }
-  $this.addClass('selected').siblings().removeClass('selected');
   sid = $this.attr('data-id');
   showResponse(sid);
+})
+.on('click', function(e){
+  var tar = e.target;
+  var $this;
+  var sid;
+  if (tar.nodeName.toLowerCase()==='tr') {
+    $this = $(tar);
+  }else{
+    $this = $(e.target).parents('tr');
+  }
+  $this.addClass('click-selected').siblings().removeClass('click-selected');
 });
+
+$('#filter-handler').on('keyup', function(e){
+  if (e.keyCode!==13) return;
+  var txt = $.trim( $(this).val() );
+  session.filter = txt;
+  if (!txt) return;
+  var list = [];
+  $.each(session.data, function(idx, item){
+    if (item && item.url && item.url.indexOf(txt)>-1) {
+      list.push(item);
+    }
+  });
+  updateFilter(list);
+});
+
+function updateFilter(data){
+  var html = template('tpl-filter-list', {
+    dataList: data
+  });
+  $list.html(html);
+}
 
 function showResponse(sid){
   var listData = session.data[sid];

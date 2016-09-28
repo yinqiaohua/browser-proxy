@@ -86,4 +86,17 @@ function getCodeFromNote(fn){
 }
 util.getCodeFromNote = getCodeFromNote;
 
+
+
+function getUrlParam(p, u) {
+  var reg = new RegExp("(^|&|\\\\?)" + p + "=([^&]*)(&|$|#)"),
+    r = null;
+  r = u.match(reg);
+  if (r) {
+    return r[2];
+  }
+  return "";
+}
+util.getUrlParam = getUrlParam;
+
 module.exports = util;

@@ -10,7 +10,14 @@
 <body>
 
 
-
+<div class="form-inline filter-control">
+  <div class="form-group">
+    <div class="input-group">
+      <div class="input-group-addon">filter http request</div>
+      <input class="form-control" type="text" placeholder="filter here" id="filter-handler" />
+    </div>
+  </div>
+</div>
 <div class="panel panel-default detail-layer-pannel" id="layer-pannel" style="display: none;">
   <div class="panel-heading">
     <h3 class="panel-title">Request Detail Pannel</h3>
@@ -53,6 +60,7 @@
       <th>URL</th>
       <th>ServerIp</th>
       <th>TimeSpend</th>
+      <th>FileSize</th>
     </tr>
   </thead>
   <tbody id="data-list"></tbody>
@@ -62,6 +70,8 @@
 <script id="tpl-req-list" type="text/html">
 {{if useHost}}
 <tr class="tr-host-selected" data-id="{{id}}">
+{{else if maplocal}}
+<tr class="tr-maplocal-selected" data-id="{{id}}">
 {{else}}
 <tr data-id="{{id}}">
 {{/if}}
@@ -69,12 +79,36 @@
   <td class="data-status">{{status}}</td>
   <td class="data-protocol">{{protocol}}</td>
   <td class="data-host">{{host}}</td>
-  <td class="data-url">{{url}}</td>
+  <td class="data-url">{{(url+'').substring(0,80)}}</td>
   <td class="data-serverip"></td>
   <td class="data-timespend">{{serverip}}</td>
+  <td class="data-filesize">{{filesize}}</td>
 </tr>
 </script>
 <!-- request url list template end -->
+
+<!-- filter list template start -->
+<script id="tpl-filter-list" type="text/html">
+{{each dataList as v k}}
+  {{if v.useHost}}
+  <tr class="tr-host-selected" data-id="{{v.id}}">
+  {{else if v.maplocal}}
+  <tr class="tr-maplocal-selected" data-id="{{v.id}}">
+  {{else}}
+  <tr data-id="{{v.id}}">
+  {{/if}}
+    <td class="data-index">{{v.index}}</td>
+    <td class="data-status">{{v.statusCode}}</td>
+    <td class="data-protocol">{{v.protocol}}</td>
+    <td class="data-host">{{v.host}}</td>
+    <td class="data-url">{{v.pathname}}</td>
+    <td class="data-serverip">{{v.hostname}}</td>
+    <td class="data-timespend">{{v.timespend}}</td>
+    <td class="data-timespend">{{v.filesize}}</td>
+  </tr>
+{{/each}}
+</script>
+<!-- filter list template end -->
 
 <!-- response template start -->
 <script id="tpl-req-headers" type="text/html">
