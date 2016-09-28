@@ -1,6 +1,10 @@
 # browser-proxy
 
-## 前端调试的代理工具
+## UI界面
+![Alt text](./images/pannel.png "UI界面")
+![Alt text](./images/resp.png "响应界面")
+
+## 前端调试的代理调试工具
 * 代理到本地文件
 * 支持host设置（支持单个请求host）
 * 代理到url
@@ -23,6 +27,9 @@ browser-proxy -p 8888
 // set a config file
 browser-proxy -c /path/to/local/file/browser-proxy.config.js
 ```
+## 启动UI界面，浏览器打开
+
+[http://localhost:9000](http://localhost:9000)
 
 ## 代理规则
 
@@ -69,7 +76,7 @@ browser-proxy -c /path/to/local/file/browser-proxy.config.js
 ### >> 支持cgi jsonp
 ```
 {
-  "indexof": "http://h5vv.video.qq.com/getinfo",
+  "indexof": "http://m.v.qq.com/getinfo",
   "localFile": "/path/to/local/file/getinfo.json"
   "useJSONPCallback": true
 }
@@ -77,7 +84,7 @@ browser-proxy -c /path/to/local/file/browser-proxy.config.js
 ### >> cgi指定返回http status code
 ```
 {
-  "indexof": "http://h5vv.video.qq.com/getinfo",
+  "indexof": "http://m.v.qq.com/getinfo",
   "httpResponseCode": "404"
 }
 ```

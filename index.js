@@ -40,7 +40,7 @@ util.showLog([
 
 if (process.env.http_proxy_browser) {
   R = R.defaults({'proxy':process.env.http_proxy_browser});
-  util.showLog(['[Info] Current Extenal Proxy:', 'red'],[ process.env.http_proxy_browser, 'red.underline'])
+  util.showLog(['[Info] Current Extenal Proxy:', 'green'],[ process.env.http_proxy_browser, 'green.underline'])
 }
 
 var httpServer;
@@ -100,7 +100,7 @@ function watchConfigUpdate(options){
   if(options.configPath){
     configFilePath = options.configPath;
   }
-  util.showLog(['Browser Proxy Watching Config:', 'gray'], [path.resolve(configFilePath), 'underline.gray']);
+  util.showLog(['Browser Proxy Watching Config:', 'green'], [path.resolve(configFilePath), 'underline.gray']);
   // 加载配置
   config = require(configFilePath);
   parseHost();
@@ -139,7 +139,7 @@ function createHttpServer(options){
     app(req, res);
   });
   httpServer.listen(options.AppPort);
-  util.showLog(['Txplayer Browser Debug Proxy: ', 'green'], ['http://127.0.0.1:'+options.AppPort, 'red.underline']);
+  util.showLog(['Txplayer Browser Debug Proxy: ', 'green'], ['http://127.0.0.1:'+options.AppPort, 'gray.underline']);
 }
 
 // 创建代理服务器－https
@@ -204,10 +204,12 @@ function app(req, res){
 
   // delete gzip
   delete req.headers['accept-encoding'];
+  var urlParse = URL.parse(req.url, true);
   if (Msg && Msg.emit) {
     Msg.emit('request', {
       url: req.url,
       id: sid,
+      query: urlParse.query,
       method: req.method,
       reqHeaders: req.headers,
       reqStartTime: (+new Date)
@@ -215,7 +217,6 @@ function app(req, res){
   }
 
   var inRules = false;
-  var urlParse = URL.parse(req.url);
   if (!config.rules || config.rules.constructor!==Array) {
     util.showLog(['Proxy Rule is Empty!', 'red']);
     return;

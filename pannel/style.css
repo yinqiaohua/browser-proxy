@@ -16,6 +16,7 @@ body{
   height: 100%;
   z-index: 9999;
   overflow: scroll;
+  top: 0;
 }
 .table-condensed{
   width: 50%;
@@ -32,6 +33,7 @@ body{
   background: #f5f5dc none repeat scroll 0 0;
   padding: 12px;
   word-break: break-all;
+  font-size: 18px;
 }
 tr.tr-host-selected,tr.tr-host-selected td{
   background-color: #bff5f7 !important;
@@ -49,7 +51,7 @@ tr.tr-status-400,tr.tr-status-400 td{
   background: #f7debe !important;
 }
 .filter-control{
-  padding: 10px 20px;
+  padding: 0 20px;
   background-color: #9ace70;
 }
 .filter-control input{
@@ -59,4 +61,7 @@ tr.tr-status-400,tr.tr-status-400 td{
 /* normal style */
 .table > thead > tr > td, .table > tbody > tr > td, .table > tfood > tr > td, .table > thead > tr > th, .table > tbody > tr > th, .table > tfood > tr > th{
   padding: 3px 5px;
+}
+.clear{
+  clear: both;
 }

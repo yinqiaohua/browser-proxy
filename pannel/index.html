@@ -28,8 +28,8 @@
   </div>
   <div class="panel-body">
     <h3 id="response-url-title" class="response-url-title"></h3>
-    <div id="example-4_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
-      <div class="row">
+    <div class="dataTables_wrapper form-inline dt-bootstrap">
+      <div class="row" style="display: none;">
         <div class="col-sm-5"></div>
         <div class="col-sm-7">
           <div class="DTTT_container">
@@ -101,7 +101,7 @@
     <td class="data-status">{{v.statusCode}}</td>
     <td class="data-protocol">{{v.protocol}}</td>
     <td class="data-host">{{v.host}}</td>
-    <td class="data-url">{{v.pathname}}</td>
+    <td class="data-url">{{(v.pathname+'').substring(0,80)}}</td>
     <td class="data-serverip">{{v.hostname}}</td>
     <td class="data-timespend">{{v.timespend}}</td>
     <td class="data-timespend">{{v.filesize}}</td>
@@ -124,6 +124,44 @@
     {{each reqHd as value index}}
     <tr>
       <td style="min-width: 200px">{{index}}</td>
+      <td class="wd-break">{{value}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<table class="table table-condensed">
+  <caption>request query</caption>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{each query as value index}}
+    <tr>
+      <td>{{index}}</td>
+      <td class="wd-break">{{value}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<div class="clear"></div>
+
+<table class="table table-condensed">
+  <caption>request cookies</caption>
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{each cookies as value index}}
+    <tr>
+      <td>{{index}}</td>
       <td class="wd-break">{{value}}</td>
     </tr>
     {{/each}}

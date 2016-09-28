@@ -15,6 +15,7 @@ function updateRequestData(data){
   session.data [ data.id ].protocol = HostData.protocol;
   session.data [ data.id ].host = HostData.hostname;
   session.data [ data.id ].pathname = HostData.pathname;
+  session.data [ data.id ].query = data.query;
 
   if (
       !session.filter ||
@@ -162,17 +163,36 @@ function updateFilter(data){
   $list.html(html);
 }
 
+function getCookies(cookie){
+  if (!cookie) return null;
+  var list = cookie.split('; ');
+  var cookieData = {};
+  $.each(list, function(idx, item){
+    if (item && item.indexOf('=')>-1) {
+      var kv = item.split('=');
+      if (kv && kv.length===2){
+        cookieData[kv[0]] = kv[1];
+      }
+    }
+  })
+  return cookieData;
+}
+
 function showResponse(sid){
   var listData = session.data[sid];
   if (!listData) return;
+  var cookies = getCookies(listData.reqHeaders.cookie);
   var html = template('tpl-req-headers', {
     resHd: listData.resHeaders,
     reqHd: listData.reqHeaders,
-    body: listData.body
+    body: listData.body,
+    query: listData.query,
+    cookies: cookies
   });
+  var showUrlHtml = '<a href="' +listData.url+ '" target="_blank;">' +listData.url+ '</a>';
   document.getElementById('response-pannel').innerHTML = html;
   $('#layer-pannel').show();
-  $('#response-url-title').html( listData.method + '&nbsp;&nbsp;' + listData.url );
+  $('#response-url-title').html( listData.method + '&nbsp;&nbsp;' + showUrlHtml );
 }
 function closeLayer(){
   $('#layer-pannel').hide();
