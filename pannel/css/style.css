@@ -53,9 +53,18 @@ tr.tr-status-400,tr.tr-status-400 td{
 .filter-control{
   padding: 0 20px;
   background-color: #9ace70;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 3;
 }
 .filter-control input{
   width: 400px !important;
+}
+.request-list{
+  position: absolute;
+  top: 35px;
+  z-index: 2;
 }
 
 /* normal style */
