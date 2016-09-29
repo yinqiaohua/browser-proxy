@@ -1,5 +1,9 @@
 var Header = require('./header.js');
+var Table = require('./table.js');
 ReactDOM.render(
-  <Header />,
+  <div>
+    <Header />
+    <Table />
+  </div>,
   document.getElementById('container')
 );

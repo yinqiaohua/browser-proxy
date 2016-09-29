@@ -52,11 +52,14 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Header = __webpack_require__(2);
+	var Table = __webpack_require__(3);
 	ReactDOM.render(
-	  React.createElement(Header, null),
+	  React.createElement("div", null, 
+	    React.createElement(Header, null), 
+	    React.createElement(Table, null)
+	  ),
 	  document.getElementById('container')
 	);
-
 
 /***/ },
 /* 2 */
@@ -85,6 +88,38 @@
 	  }
 	});
 	module.exports = Header;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	var Table = React.createClass({displayName: "Table",
+	  getInitialState: function () {
+	    return { count: 0 };
+	  },
+	  handleClick: function () {
+	  },
+	  render: function () {
+	    return (
+	      React.createElement("table", {className: "table table-small-font table-bordered table-striped request-list"}, 
+	        React.createElement("thead", null, 
+	          React.createElement("tr", null, 
+	            React.createElement("th", null, "#"), 
+	            React.createElement("th", null, "Result"), 
+	            React.createElement("th", null, "Protocol"), 
+	            React.createElement("th", null, "Host"), 
+	            React.createElement("th", null, "URL"), 
+	            React.createElement("th", null, "ServerIp"), 
+	            React.createElement("th", null, "TimeSpend"), 
+	            React.createElement("th", null, "FileSize")
+	          )
+	        ), 
+	        React.createElement("tbody", {id: "data-list"})
+	      )
+	    );
+	  }
+	});
+	module.exports = Table;
 
 /***/ }
 /******/ ]);

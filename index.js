@@ -395,6 +395,7 @@ function handlerLocalResponse(options){
 
 function responseEmit(data){
   var param = {};
+  data = data || {};
   param.sid = data.sid;
   if (data.res && data.res.headers) {
     param.resHeaders = data.res.headers;
@@ -467,6 +468,7 @@ function sendRequest(req, res, urlParse, item, headers){
   }
   var emitData = function(response, body, postBody){
     var _data = {};
+    response = response || {};
     _data.res = response;
     _data.sid = req.__sid__;
     if (body) _data.body = body;
