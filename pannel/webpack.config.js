@@ -1,12 +1,12 @@
 var path = require('path');
 module.exports = {
   entry:[
-    'index.js'
+    'main.jsx'
   ],
   output: {
     path: __dirname + '/dist/',
     publicPath: "/dist/",
-    filename: 'index.js'
+    filename: 'main.js'
   },
   resolve: {
     root: path.resolve('./src/'),
@@ -15,7 +15,14 @@ module.exports = {
   resolveLoader: { root: path.join(__dirname, "node_modules") },
   module: {
     loaders: [
-      { test: /\.jsx?$/, loaders: ['jsx?harmony']}
+      {
+        test: /\.jsx?$/,
+        exclude: /(node_modules)/,
+        loader: 'babel',
+        query: {
+          presets: ['react', 'es2015']
+        }
+      }
     ]
   }
 };

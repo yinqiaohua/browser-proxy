@@ -10,12 +10,12 @@ function updateRequestData(data){
   }
   var HostData = getUrlHostData(data.url);
 
-  session.data [ data.id ] = data;
-  session.data [ data.id ].index = session.index;
-  session.data [ data.id ].protocol = HostData.protocol;
-  session.data [ data.id ].host = HostData.hostname;
-  session.data [ data.id ].pathname = HostData.pathname;
-  session.data [ data.id ].query = data.query;
+  session.data [ data.sid ] = data;
+  session.data [ data.sid ].index = session.index;
+  session.data [ data.sid ].protocol = HostData.protocol;
+  session.data [ data.sid ].host = HostData.hostname;
+  session.data [ data.sid ].pathname = HostData.pathname;
+  session.data [ data.sid ].query = data.query;
 
   if (
       !session.filter ||
@@ -28,7 +28,7 @@ function updateRequestData(data){
       host: HostData.hostname,
       url: HostData.pathname,
       serverip: data.hostname,
-      id: data.id,
+      sid: data.sid,
       useHOST: ''
     });
     $(html).appendTo($list);

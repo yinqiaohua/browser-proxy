@@ -4,7 +4,7 @@
  * @description a proxy for mac browser
  * @source https://github.com/zobor/browser-proxy
  */
-
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var http = require('http');
 var https = require('https');
 var r = require('request');
@@ -42,6 +42,15 @@ if (process.env.http_proxy_browser) {
   R = R.defaults({'proxy':process.env.http_proxy_browser});
   util.showLog(['Current Extenal Proxy:', 'green'],[ process.env.http_proxy_browser, 'green.underline'])
 }
+
+r.defaults({
+  strictSSL: false,
+  rejectUnauthorized: false
+});
+R.defaults({
+  strictSSL: false,
+  rejectUnauthorized: false
+});
 
 var httpServer;
 var httpsServer;
@@ -209,7 +218,7 @@ function app(req, res){
   if (Msg && Msg.emit) {
     Msg.emit('request', {
       url: req.url,
-      id: sid,
+      sid: sid,
       query: urlParse.query,
       method: req.method,
       reqHeaders: req.headers,
@@ -430,7 +439,8 @@ function sendRequest(req, res, urlParse, item, headers){
   var requestConfig = {
     url: req.url,
     headers: req.headers,
-    timeout: 10000
+    timeout: 10000,
+    rejectUnhauthorized : false
   };
   // replace remote url
   if (item.remoteUrl) {

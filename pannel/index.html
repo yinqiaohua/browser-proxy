@@ -70,11 +70,11 @@
 <!-- request url list template start -->
 <script id="tpl-req-list" type="text/html">
 {{if useHost}}
-<tr class="tr-host-selected" data-id="{{id}}">
+<tr class="tr-host-selected" data-id="{{sid}}">
 {{else if maplocal}}
-<tr class="tr-maplocal-selected" data-id="{{id}}">
+<tr class="tr-maplocal-selected" data-id="{{sid}}">
 {{else}}
-<tr data-id="{{id}}">
+<tr data-id="{{sid}}">
 {{/if}}
   <td class="data-index">{{index}}</td>
   <td class="data-status">{{status}}</td>
@@ -92,11 +92,11 @@
 <script id="tpl-filter-list" type="text/html">
 {{each dataList as v k}}
   {{if v.useHost}}
-  <tr class="tr-host-selected" data-id="{{v.id}}">
+  <tr class="tr-host-selected" data-id="{{v.sid}}">
   {{else if v.maplocal}}
-  <tr class="tr-maplocal-selected" data-id="{{v.id}}">
+  <tr class="tr-maplocal-selected" data-id="{{v.sid}}">
   {{else}}
-  <tr data-id="{{v.id}}">
+  <tr data-id="{{v.sid}}">
   {{/if}}
     <td class="data-index">{{v.index}}</td>
     <td class="data-status">{{v.statusCode}}</td>
