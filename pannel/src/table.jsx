@@ -1,17 +1,20 @@
-import React from 'react';
+import React from 'react'
+import ResDetail from './res-detail.jsx'
 
 class Table extends React.Component {
 
   constructor(props){
     super(props)
     this.state = {
-      rows: ''
+      rows: []
     }
     this.dataset = {
       session: {},
       index: 0
     }
     this.init()
+
+    this.clickHandler = this.clickHandler.bind(this)
   }
 
   getUrlHostData(url){
@@ -47,7 +50,6 @@ class Table extends React.Component {
       })
     })
     this.props.msg.on('requestDone', function(data){
-      console.log(data)
       if ( !(data && data.sid) ) return;
       Object.assign(that.dataset.session[data.sid], data)
       if (data.resHeaders && data.resHeaders["content-length"]) {
@@ -71,9 +73,18 @@ class Table extends React.Component {
     })
   }
 
+  clickHandler(e){
+    var $tr = e.target;
+    if ($tr.nodeName.toLowerCase()==='td') {
+      $tr = $( $tr ).parents('tr')
+    }else{
+      $tr = $( $tr )
+    }
+  }
+
   updateRows(data){
     return (
-      <tr data-id={data.sid}>
+      <tr data-id={data.sid} onClick={this.clickHandler}>
         <td>{data.index}</td>
         <td className='data-status'></td>
         <td className='data-protocol'>{data.protocol}</td>
@@ -107,4 +118,4 @@ class Table extends React.Component {
   }
 }
 
-export default Table;
+export default Table

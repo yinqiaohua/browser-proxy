@@ -73,7 +73,11 @@
 
 	var _table2 = _interopRequireDefault(_table);
 
-	var _msgSender = __webpack_require__(176);
+	var _resDetail = __webpack_require__(176);
+
+	var _resDetail2 = _interopRequireDefault(_resDetail);
+
+	var _msgSender = __webpack_require__(177);
 
 	var _msgSender2 = _interopRequireDefault(_msgSender);
 
@@ -86,6 +90,7 @@
 	  null,
 	  _react2.default.createElement(_header2.default, { msg: msg }),
 	  _react2.default.createElement(_table2.default, { msg: msg }),
+	  _react2.default.createElement(_resDetail2.default, { msg: msg }),
 	  _react2.default.createElement(_msgSender2.default, { msg: msg })
 	), document.getElementById('container'));
 
@@ -4263,11 +4268,18 @@
 	        break;
 	      // slower
 	      default:
-	        args = Array.prototype.slice.call(arguments, 1);
+	        len = arguments.length;
+	        args = new Array(len - 1);
+	        for (i = 1; i < len; i++)
+	          args[i - 1] = arguments[i];
 	        handler.apply(this, args);
 	    }
 	  } else if (isObject(handler)) {
-	    args = Array.prototype.slice.call(arguments, 1);
+	    len = arguments.length;
+	    args = new Array(len - 1);
+	    for (i = 1; i < len; i++)
+	      args[i - 1] = arguments[i];
+
 	    listeners = handler.slice();
 	    len = listeners.length;
 	    for (i = 0; i < len; i++)
@@ -4305,6 +4317,7 @@
 
 	  // Check for listener leak
 	  if (isObject(this._events[type]) && !this._events[type].warned) {
+	    var m;
 	    if (!isUndefined(this._maxListeners)) {
 	      m = this._maxListeners;
 	    } else {
@@ -4426,7 +4439,7 @@
 
 	  if (isFunction(listeners)) {
 	    this.removeListener(type, listeners);
-	  } else if (listeners) {
+	  } else {
 	    // LIFO order
 	    while (listeners.length)
 	      this.removeListener(type, listeners[listeners.length - 1]);
@@ -4447,20 +4460,15 @@
 	  return ret;
 	};
 
-	EventEmitter.prototype.listenerCount = function(type) {
-	  if (this._events) {
-	    var evlistener = this._events[type];
-
-	    if (isFunction(evlistener))
-	      return 1;
-	    else if (evlistener)
-	      return evlistener.length;
-	  }
-	  return 0;
-	};
-
 	EventEmitter.listenerCount = function(emitter, type) {
-	  return emitter.listenerCount(type);
+	  var ret;
+	  if (!emitter._events || !emitter._events[type])
+	    ret = 0;
+	  else if (isFunction(emitter._events[type]))
+	    ret = 1;
+	  else
+	    ret = emitter._events[type].length;
+	  return ret;
 	};
 
 	function isFunction(arg) {
@@ -21761,6 +21769,10 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _resDetail = __webpack_require__(176);
+
+	var _resDetail2 = _interopRequireDefault(_resDetail);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21778,13 +21790,15 @@
 	    var _this = _possibleConstructorReturn(this, (Table.__proto__ || Object.getPrototypeOf(Table)).call(this, props));
 
 	    _this.state = {
-	      rows: ''
+	      rows: []
 	    };
 	    _this.dataset = {
 	      session: {},
 	      index: 0
 	    };
 	    _this.init();
+
+	    _this.clickHandler = _this.clickHandler.bind(_this);
 	    return _this;
 	  }
 
@@ -21825,7 +21839,6 @@
 	        });
 	      });
 	      this.props.msg.on('requestDone', function (data) {
-	        console.log(data);
 	        if (!(data && data.sid)) return;
 	        Object.assign(that.dataset.session[data.sid], data);
 	        if (data.resHeaders && data.resHeaders["content-length"]) {
@@ -21849,11 +21862,21 @@
 	      });
 	    }
 	  }, {
+	    key: 'clickHandler',
+	    value: function clickHandler(e) {
+	      var $tr = e.target;
+	      if ($tr.nodeName.toLowerCase() === 'td') {
+	        $tr = $($tr).parents('tr');
+	      } else {
+	        $tr = $($tr);
+	      }
+	    }
+	  }, {
 	    key: 'updateRows',
 	    value: function updateRows(data) {
 	      return _react2.default.createElement(
 	        'tr',
-	        { 'data-id': data.sid },
+	        { 'data-id': data.sid, onClick: this.clickHandler },
 	        _react2.default.createElement(
 	          'td',
 	          null,
@@ -21962,6 +21985,161 @@
 
 /***/ },
 /* 176 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ResDetail = function (_React$Component) {
+	  _inherits(ResDetail, _React$Component);
+
+	  function ResDetail(props) {
+	    _classCallCheck(this, ResDetail);
+
+	    var _this = _possibleConstructorReturn(this, (ResDetail.__proto__ || Object.getPrototypeOf(ResDetail)).call(this, props));
+
+	    _this.state = {
+	      layer: []
+	    };
+	    return _this;
+	  }
+
+	  _createClass(ResDetail, [{
+	    key: "show",
+	    value: function show() {
+	      this.setState({
+	        layer: this.buildResponseHtml()
+	      });
+	    }
+	  }, {
+	    key: "buildResponseHtml",
+	    value: function buildResponseHtml(data) {
+	      return _react2.default.createElement(
+	        "div",
+	        { className: "panel panel-default detail-layer-pannel", id: "layer-pannel", style: "display: none2;" },
+	        _react2.default.createElement(
+	          "div",
+	          { className: "panel-heading" },
+	          _react2.default.createElement(
+	            "h3",
+	            { className: "panel-title" },
+	            "Request Detail Pannel"
+	          ),
+	          _react2.default.createElement(
+	            "div",
+	            { className: "panel-options" },
+	            _react2.default.createElement(
+	              "a",
+	              { href: "javascript:;", id: "close-layer-dialog" },
+	              "\xD7"
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          "div",
+	          { className: "panel-body" },
+	          _react2.default.createElement("h3", { id: "response-url-title", className: "response-url-title" }),
+	          _react2.default.createElement(
+	            "div",
+	            { className: "dataTables_wrapper form-inline dt-bootstrap" },
+	            _react2.default.createElement(
+	              "div",
+	              { className: "row", style: "display: none;" },
+	              _react2.default.createElement("div", { className: "col-sm-5" }),
+	              _react2.default.createElement(
+	                "div",
+	                { className: "col-sm-7" },
+	                _react2.default.createElement(
+	                  "div",
+	                  { className: "DTTT_container" },
+	                  _react2.default.createElement(
+	                    "a",
+	                    { className: "DTTT_button" },
+	                    _react2.default.createElement(
+	                      "span",
+	                      null,
+	                      "Request Headers"
+	                    )
+	                  ),
+	                  _react2.default.createElement(
+	                    "a",
+	                    { className: "DTTT_button" },
+	                    _react2.default.createElement(
+	                      "span",
+	                      null,
+	                      "Request Params"
+	                    )
+	                  ),
+	                  _react2.default.createElement(
+	                    "a",
+	                    { className: "DTTT_button" },
+	                    _react2.default.createElement(
+	                      "span",
+	                      null,
+	                      "Request Cookies"
+	                    )
+	                  ),
+	                  _react2.default.createElement(
+	                    "a",
+	                    { className: "DTTT_button" },
+	                    _react2.default.createElement(
+	                      "span",
+	                      null,
+	                      "Response Headers"
+	                    )
+	                  ),
+	                  _react2.default.createElement(
+	                    "a",
+	                    { className: "DTTT_button" },
+	                    _react2.default.createElement(
+	                      "span",
+	                      null,
+	                      "Response Content"
+	                    )
+	                  )
+	                )
+	              )
+	            ),
+	            _react2.default.createElement("div", { id: "response-pannel" })
+	          )
+	        )
+	      );
+	    }
+	  }, {
+	    key: "render",
+	    value: function render() {
+	      return _react2.default.createElement(
+	        "div",
+	        null,
+	        this.state.layer
+	      ), document.getElementById('res-container');
+	    }
+	  }]);
+
+	  return ResDetail;
+	}(_react2.default.Component);
+
+	exports.default = ResDetail;
+
+/***/ },
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
