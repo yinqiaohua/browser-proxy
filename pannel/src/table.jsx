@@ -1,5 +1,4 @@
 import React from 'react'
-import ResDetail from './res-detail.jsx'
 
 class Table extends React.Component {
 
@@ -12,6 +11,7 @@ class Table extends React.Component {
       session: {},
       index: 0
     }
+    window.zobor = this.dataset
     this.init()
 
     this.clickHandler = this.clickHandler.bind(this)
@@ -50,26 +50,36 @@ class Table extends React.Component {
       })
     })
     this.props.msg.on('requestDone', function(data){
-      if ( !(data && data.sid) ) return;
-      Object.assign(that.dataset.session[data.sid], data)
-      if (data.resHeaders && data.resHeaders["content-length"]) {
-        that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"])
+      var showResponse = function(data){
+        if ( !(data && data.sid) ) return;
+        // Object.assign(that.dataset.session[data.sid], data)
+        for(var i in data){
+          that.dataset.session[data.sid][i] = data[i]
+        }
+        if (data.resHeaders && data.resHeaders["content-length"]) {
+          that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"])
+        }
+        that.dataset.session[data.sid].timespend = that.dataset.session[data.sid].reqEndTime- that.dataset.session[data.sid].reqStartTime;
+
+        var $sid = $('tr[data-id="' + data.sid + '"]')
+        console.log(data.sid, $sid.find('td:eq(0)').text())
+        $sid.find('td.data-serverip').html( data.hostname )
+        $sid.find('td.data-status').html( data.statusCode )
+        $sid.find('td.data-timespend').html( that.dataset.session[data.sid].timespend )
+        if (data.useHOST) {
+          $sid.addClass('tr-host-selected')
+        }
+        if (data.mapLocal) {
+          $sid.addClass('tr-maplocal-selected')
+        }
+        if ( (data.statusCode+'').indexOf('4')===0 ) {
+          $sid.addClass('tr-status-400')
+        }
+        $sid.find('td.data-filesize').html( that.dataset.session[data.sid].filesize )
       }
-      that.dataset.session[data.sid].timespend = that.dataset.session[data.sid].reqEndTime- that.dataset.session[data.sid].reqStartTime
-      var $sid = $('[data-id=' + data.sid + ']')
-      $sid.find('td.data-serverip').html( data.hostname )
-      $sid.find('td.data-status').html( data.statusCode )
-      $sid.find('td.data-timespend').html( that.dataset.session[data.sid].timespend )
-      if (data.useHOST) {
-        $sid.addClass('tr-host-selected')
-      }
-      if (data.mapLocal) {
-        $sid.addClass('tr-maplocal-selected')
-      }
-      if ( (data.statusCode+'').indexOf('4')===0 ) {
-        $sid.addClass('tr-status-400')
-      }
-      $sid.find('td.data-filesize').html( that.dataset.session[data.sid].filesize )
+      showResponse(data)
+      // var elm = document.querySelector('[data-id="'+data.sid+'"]')
+      // console.info(data.sid, elm,  $(elm).attr('data-id') );
     })
   }
 
@@ -80,6 +90,11 @@ class Table extends React.Component {
     }else{
       $tr = $( $tr )
     }
+    var id = $tr.attr('data-id')
+    this.props.msg.emit('tableClick', {
+      id: id,
+      data: this.dataset.session[id]
+    })
   }
 
   updateRows(data){

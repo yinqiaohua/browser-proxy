@@ -15,6 +15,8 @@ class msgSender extends React.Component {
       });
 
       socket.on('response', function (data) {
+        // var elm = document.querySelector('[data-id="'+data.sid+'"]')
+        // console.log(data.sid, elm,  $(elm).attr('data-id') )
         that.props.msg.emit('requestDone', data);
       });
     });

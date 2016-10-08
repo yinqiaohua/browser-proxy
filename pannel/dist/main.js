@@ -4268,18 +4268,11 @@
 	        break;
 	      // slower
 	      default:
-	        len = arguments.length;
-	        args = new Array(len - 1);
-	        for (i = 1; i < len; i++)
-	          args[i - 1] = arguments[i];
+	        args = Array.prototype.slice.call(arguments, 1);
 	        handler.apply(this, args);
 	    }
 	  } else if (isObject(handler)) {
-	    len = arguments.length;
-	    args = new Array(len - 1);
-	    for (i = 1; i < len; i++)
-	      args[i - 1] = arguments[i];
-
+	    args = Array.prototype.slice.call(arguments, 1);
 	    listeners = handler.slice();
 	    len = listeners.length;
 	    for (i = 0; i < len; i++)
@@ -4317,7 +4310,6 @@
 
 	  // Check for listener leak
 	  if (isObject(this._events[type]) && !this._events[type].warned) {
-	    var m;
 	    if (!isUndefined(this._maxListeners)) {
 	      m = this._maxListeners;
 	    } else {
@@ -4439,7 +4431,7 @@
 
 	  if (isFunction(listeners)) {
 	    this.removeListener(type, listeners);
-	  } else {
+	  } else if (listeners) {
 	    // LIFO order
 	    while (listeners.length)
 	      this.removeListener(type, listeners[listeners.length - 1]);
@@ -4460,15 +4452,20 @@
 	  return ret;
 	};
 
+	EventEmitter.prototype.listenerCount = function(type) {
+	  if (this._events) {
+	    var evlistener = this._events[type];
+
+	    if (isFunction(evlistener))
+	      return 1;
+	    else if (evlistener)
+	      return evlistener.length;
+	  }
+	  return 0;
+	};
+
 	EventEmitter.listenerCount = function(emitter, type) {
-	  var ret;
-	  if (!emitter._events || !emitter._events[type])
-	    ret = 0;
-	  else if (isFunction(emitter._events[type]))
-	    ret = 1;
-	  else
-	    ret = emitter._events[type].length;
-	  return ret;
+	  return emitter.listenerCount(type);
 	};
 
 	function isFunction(arg) {
@@ -21769,10 +21766,6 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _resDetail = __webpack_require__(176);
-
-	var _resDetail2 = _interopRequireDefault(_resDetail);
-
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21796,6 +21789,7 @@
 	      session: {},
 	      index: 0
 	    };
+	    window.zobor = _this.dataset;
 	    _this.init();
 
 	    _this.clickHandler = _this.clickHandler.bind(_this);
@@ -21839,26 +21833,36 @@
 	        });
 	      });
 	      this.props.msg.on('requestDone', function (data) {
-	        if (!(data && data.sid)) return;
-	        Object.assign(that.dataset.session[data.sid], data);
-	        if (data.resHeaders && data.resHeaders["content-length"]) {
-	          that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"]);
-	        }
-	        that.dataset.session[data.sid].timespend = that.dataset.session[data.sid].reqEndTime - that.dataset.session[data.sid].reqStartTime;
-	        var $sid = $('[data-id=' + data.sid + ']');
-	        $sid.find('td.data-serverip').html(data.hostname);
-	        $sid.find('td.data-status').html(data.statusCode);
-	        $sid.find('td.data-timespend').html(that.dataset.session[data.sid].timespend);
-	        if (data.useHOST) {
-	          $sid.addClass('tr-host-selected');
-	        }
-	        if (data.mapLocal) {
-	          $sid.addClass('tr-maplocal-selected');
-	        }
-	        if ((data.statusCode + '').indexOf('4') === 0) {
-	          $sid.addClass('tr-status-400');
-	        }
-	        $sid.find('td.data-filesize').html(that.dataset.session[data.sid].filesize);
+	        var showResponse = function showResponse(data) {
+	          if (!(data && data.sid)) return;
+	          // Object.assign(that.dataset.session[data.sid], data)
+	          for (var i in data) {
+	            that.dataset.session[data.sid][i] = data[i];
+	          }
+	          if (data.resHeaders && data.resHeaders["content-length"]) {
+	            that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"]);
+	          }
+	          that.dataset.session[data.sid].timespend = that.dataset.session[data.sid].reqEndTime - that.dataset.session[data.sid].reqStartTime;
+
+	          var $sid = $('tr[data-id="' + data.sid + '"]');
+	          console.log(data.sid, $sid.find('td:eq(0)').text());
+	          $sid.find('td.data-serverip').html(data.hostname);
+	          $sid.find('td.data-status').html(data.statusCode);
+	          $sid.find('td.data-timespend').html(that.dataset.session[data.sid].timespend);
+	          if (data.useHOST) {
+	            $sid.addClass('tr-host-selected');
+	          }
+	          if (data.mapLocal) {
+	            $sid.addClass('tr-maplocal-selected');
+	          }
+	          if ((data.statusCode + '').indexOf('4') === 0) {
+	            $sid.addClass('tr-status-400');
+	          }
+	          $sid.find('td.data-filesize').html(that.dataset.session[data.sid].filesize);
+	        };
+	        showResponse(data);
+	        // var elm = document.querySelector('[data-id="'+data.sid+'"]')
+	        // console.info(data.sid, elm,  $(elm).attr('data-id') );
 	      });
 	    }
 	  }, {
@@ -21870,6 +21874,11 @@
 	      } else {
 	        $tr = $($tr);
 	      }
+	      var id = $tr.attr('data-id');
+	      this.props.msg.emit('tableClick', {
+	        id: id,
+	        data: this.dataset.session[id]
+	      });
 	    }
 	  }, {
 	    key: 'updateRows',
@@ -21987,7 +21996,7 @@
 /* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
@@ -22015,121 +22024,254 @@
 
 	    var _this = _possibleConstructorReturn(this, (ResDetail.__proto__ || Object.getPrototypeOf(ResDetail)).call(this, props));
 
+	    _this.closeClickHandler = _this.closeClickHandler.bind(_this);
+	    _this.tabChangeHandler = _this.tabChangeHandler.bind(_this);
+
+	    // state
 	    _this.state = {
-	      layer: []
+	      layerDisplay: 'none',
+	      title: '',
+	      tabDetail: ''
 	    };
+
+	    // dataset
+	    _this.dataset = {};
+
+	    _this.init();
 	    return _this;
 	  }
 
 	  _createClass(ResDetail, [{
-	    key: "show",
-	    value: function show() {
-	      this.setState({
-	        layer: this.buildResponseHtml()
+	    key: 'init',
+	    value: function init() {
+	      var that = this;
+	      this.props.msg.on('tableClick', function (data) {
+	        that.dataset.session = data;
+	        var cookies = that.getCookies(data.data.reqHeaders.cookie);
+	        that.dataset.session.data.cookies = cookies;
+	        that.setState({
+	          title: data.data.url,
+	          layerDisplay: ''
+	        });
+	        var $active = $('[data-role=res-tabs] a.active');
+	        if (!$active.length) {
+	          $active = $('[data-role=res-tabs] a:eq(0)');
+	        }
+	        that.tabChangeHandler({ target: $active.get(0) });
 	      });
 	    }
 	  }, {
-	    key: "buildResponseHtml",
-	    value: function buildResponseHtml(data) {
-	      return _react2.default.createElement(
-	        "div",
-	        { className: "panel panel-default detail-layer-pannel", id: "layer-pannel", style: "display: none2;" },
-	        _react2.default.createElement(
-	          "div",
-	          { className: "panel-heading" },
+	    key: 'closeClickHandler',
+	    value: function closeClickHandler() {
+	      this.setState({
+	        layerDisplay: 'none',
+	        title: +new Date()
+	      });
+	    }
+	  }, {
+	    key: 'tabChangeHandler',
+	    value: function tabChangeHandler(e) {
+	      var $tar = $(e.target);
+	      var action;
+	      var keyMaps = {
+	        'request-headers': 'reqHeaders',
+	        'request-params': 'query',
+	        'request-cookies': 'cookies',
+	        'response-headers': 'resHeaders',
+	        'response-body': 'body'
+	      };
+	      var data;
+	      if (!$tar.hasClass('DTTT_button')) {
+	        $tar = $tar.parents('.DTTT_button');
+	        if (!$tar.length) return;
+	      }
+	      $tar.addClass('active').siblings().removeClass('active');
+	      action = $tar.attr('data-action');
+	      if (!action) return;
+	      if (!(action in keyMaps)) return;
+	      data = this.dataset.session.data[keyMaps[action]];
+	      this.setState({
+	        tabDetail: this.buildRequestHeaders(data)
+	      });
+	    }
+	  }, {
+	    key: 'getCookies',
+	    value: function getCookies(cookie) {
+	      if (!cookie) return null;
+	      var list = cookie.split('; ');
+	      var cookieData = {};
+	      $.each(list, function (idx, item) {
+	        if (item && item.indexOf('=') > -1) {
+	          var kv = item.split('=');
+	          if (kv && kv.length === 2) {
+	            cookieData[kv[0]] = kv[1];
+	          }
+	        }
+	      });
+	      return cookieData;
+	    }
+	  }, {
+	    key: 'buildRequestHeaders',
+	    value: function buildRequestHeaders(data, title) {
+	      title = title || '';
+	      var rows = [];
+	      if ($.type(data) === 'string') {
+	        return _react2.default.createElement(
+	          'pre',
+	          null,
+	          data
+	        );
+	      }
+
+	      for (var key in data) {
+	        rows.push(_react2.default.createElement(
+	          'tr',
+	          null,
 	          _react2.default.createElement(
-	            "h3",
-	            { className: "panel-title" },
-	            "Request Detail Pannel"
+	            'td',
+	            null,
+	            key
 	          ),
 	          _react2.default.createElement(
-	            "div",
-	            { className: "panel-options" },
+	            'td',
+	            { className: 'wd-break' },
+	            data[key]
+	          )
+	        ));
+	      }
+	      return _react2.default.createElement(
+	        'table',
+	        { className: 'table table-condensed' },
+	        _react2.default.createElement(
+	          'caption',
+	          null,
+	          title
+	        ),
+	        _react2.default.createElement(
+	          'thead',
+	          null,
+	          _react2.default.createElement(
+	            'tr',
+	            null,
 	            _react2.default.createElement(
-	              "a",
-	              { href: "javascript:;", id: "close-layer-dialog" },
-	              "\xD7"
+	              'th',
+	              null,
+	              'Key'
+	            ),
+	            _react2.default.createElement(
+	              'th',
+	              null,
+	              'Value'
 	            )
 	          )
 	        ),
 	        _react2.default.createElement(
-	          "div",
-	          { className: "panel-body" },
-	          _react2.default.createElement("h3", { id: "response-url-title", className: "response-url-title" }),
+	          'tbody',
+	          null,
+	          rows
+	        )
+	      );
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'panel panel-default detail-layer-pannel', style: { display: this.state.layerDisplay } },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'panel-heading' },
 	          _react2.default.createElement(
-	            "div",
-	            { className: "dataTables_wrapper form-inline dt-bootstrap" },
+	            'h3',
+	            { className: 'panel-title' },
+	            'Request Detail Pannel'
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'panel-options' },
 	            _react2.default.createElement(
-	              "div",
-	              { className: "row", style: "display: none;" },
-	              _react2.default.createElement("div", { className: "col-sm-5" }),
+	              'a',
+	              { href: 'javascript:;', onClick: this.closeClickHandler },
+	              '\xD7'
+	            )
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'panel-body' },
+	          _react2.default.createElement(
+	            'h3',
+	            { className: 'response-url-title' },
+	            this.state.title
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'dataTables_wrapper form-inline dt-bootstrap' },
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'row', style: { display: 'none2' } },
 	              _react2.default.createElement(
-	                "div",
-	                { className: "col-sm-7" },
+	                'div',
+	                { className: 'col-sm-12' },
 	                _react2.default.createElement(
-	                  "div",
-	                  { className: "DTTT_container" },
+	                  'div',
+	                  { 'data-role': 'res-tabs', className: 'DTTT_container', onClick: this.tabChangeHandler },
 	                  _react2.default.createElement(
-	                    "a",
-	                    { className: "DTTT_button" },
+	                    'a',
+	                    { 'data-action': 'request-headers', className: 'DTTT_button' },
 	                    _react2.default.createElement(
-	                      "span",
+	                      'span',
 	                      null,
-	                      "Request Headers"
+	                      'Request Headers'
 	                    )
 	                  ),
 	                  _react2.default.createElement(
-	                    "a",
-	                    { className: "DTTT_button" },
+	                    'a',
+	                    { 'data-action': 'request-params', className: 'DTTT_button' },
 	                    _react2.default.createElement(
-	                      "span",
+	                      'span',
 	                      null,
-	                      "Request Params"
+	                      'Request Params'
 	                    )
 	                  ),
 	                  _react2.default.createElement(
-	                    "a",
-	                    { className: "DTTT_button" },
+	                    'a',
+	                    { 'data-action': 'request-cookies', className: 'DTTT_button' },
 	                    _react2.default.createElement(
-	                      "span",
+	                      'span',
 	                      null,
-	                      "Request Cookies"
+	                      'Request Cookies'
 	                    )
 	                  ),
 	                  _react2.default.createElement(
-	                    "a",
-	                    { className: "DTTT_button" },
+	                    'a',
+	                    { 'data-action': 'response-headers', className: 'DTTT_button' },
 	                    _react2.default.createElement(
-	                      "span",
+	                      'span',
 	                      null,
-	                      "Response Headers"
+	                      'Response Headers'
 	                    )
 	                  ),
 	                  _react2.default.createElement(
-	                    "a",
-	                    { className: "DTTT_button" },
+	                    'a',
+	                    { 'data-action': 'response-body', className: 'DTTT_button' },
 	                    _react2.default.createElement(
-	                      "span",
+	                      'span',
 	                      null,
-	                      "Response Content"
+	                      'Response Content'
 	                    )
 	                  )
 	                )
 	              )
 	            ),
-	            _react2.default.createElement("div", { id: "response-pannel" })
+	            _react2.default.createElement(
+	              'div',
+	              null,
+	              this.state.tabDetail
+	            )
 	          )
 	        )
 	      );
-	    }
-	  }, {
-	    key: "render",
-	    value: function render() {
-	      return _react2.default.createElement(
-	        "div",
-	        null,
-	        this.state.layer
-	      ), document.getElementById('res-container');
 	    }
 	  }]);
 
@@ -22186,6 +22328,8 @@
 	        });
 
 	        socket.on('response', function (data) {
+	          // var elm = document.querySelector('[data-id="'+data.sid+'"]')
+	          // console.log(data.sid, elm,  $(elm).attr('data-id') )
 	          that.props.msg.emit('requestDone', data);
 	        });
 	      });

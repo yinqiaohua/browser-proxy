@@ -18,10 +18,10 @@ body{
   overflow: scroll;
   top: 0;
 }
-.table-condensed{
+/*.table-condensed{
   width: 50%;
   float: left;
-}
+}*/
 .table-condensed caption{
   font-size: 30px;
 }
@@ -34,6 +34,9 @@ body{
   padding: 12px;
   word-break: break-all;
   font-size: 18px;
+}
+tr{
+  cursor: pointer;
 }
 tr.tr-host-selected,tr.tr-host-selected td{
   background-color: #bff5f7 !important;
@@ -65,6 +68,10 @@ tr.tr-status-400,tr.tr-status-400 td{
   position: absolute;
   top: 35px;
   z-index: 2;
+}
+
+.dataTables_wrapper .DTTT_container .DTTT_button.active {
+  background: #7aceef !important;
 }
 
 /* normal style */
