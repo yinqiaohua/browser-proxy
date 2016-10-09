@@ -69,15 +69,15 @@
 
 	var _header2 = _interopRequireDefault(_header);
 
-	var _table = __webpack_require__(175);
+	var _table = __webpack_require__(176);
 
 	var _table2 = _interopRequireDefault(_table);
 
-	var _resDetail = __webpack_require__(176);
+	var _resDetail = __webpack_require__(177);
 
 	var _resDetail2 = _interopRequireDefault(_resDetail);
 
-	var _msgSender = __webpack_require__(178);
+	var _msgSender = __webpack_require__(179);
 
 	var _msgSender2 = _interopRequireDefault(_msgSender);
 
@@ -4268,11 +4268,18 @@
 	        break;
 	      // slower
 	      default:
-	        args = Array.prototype.slice.call(arguments, 1);
+	        len = arguments.length;
+	        args = new Array(len - 1);
+	        for (i = 1; i < len; i++)
+	          args[i - 1] = arguments[i];
 	        handler.apply(this, args);
 	    }
 	  } else if (isObject(handler)) {
-	    args = Array.prototype.slice.call(arguments, 1);
+	    len = arguments.length;
+	    args = new Array(len - 1);
+	    for (i = 1; i < len; i++)
+	      args[i - 1] = arguments[i];
+
 	    listeners = handler.slice();
 	    len = listeners.length;
 	    for (i = 0; i < len; i++)
@@ -4310,6 +4317,7 @@
 
 	  // Check for listener leak
 	  if (isObject(this._events[type]) && !this._events[type].warned) {
+	    var m;
 	    if (!isUndefined(this._maxListeners)) {
 	      m = this._maxListeners;
 	    } else {
@@ -4431,7 +4439,7 @@
 
 	  if (isFunction(listeners)) {
 	    this.removeListener(type, listeners);
-	  } else if (listeners) {
+	  } else {
 	    // LIFO order
 	    while (listeners.length)
 	      this.removeListener(type, listeners[listeners.length - 1]);
@@ -4452,20 +4460,15 @@
 	  return ret;
 	};
 
-	EventEmitter.prototype.listenerCount = function(type) {
-	  if (this._events) {
-	    var evlistener = this._events[type];
-
-	    if (isFunction(evlistener))
-	      return 1;
-	    else if (evlistener)
-	      return evlistener.length;
-	  }
-	  return 0;
-	};
-
 	EventEmitter.listenerCount = function(emitter, type) {
-	  return emitter.listenerCount(type);
+	  var ret;
+	  if (!emitter._events || !emitter._events[type])
+	    ret = 0;
+	  else if (isFunction(emitter._events[type]))
+	    ret = 1;
+	  else
+	    ret = emitter._events[type].length;
+	  return ret;
 	};
 
 	function isFunction(arg) {
@@ -21692,7 +21695,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _filter = __webpack_require__(179);
+	var _filter = __webpack_require__(175);
 
 	var _filter2 = _interopRequireDefault(_filter);
 
@@ -21735,6 +21738,114 @@
 
 /***/ },
 /* 175 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Filter = function (_React$Component) {
+	  _inherits(Filter, _React$Component);
+
+	  function Filter(props) {
+	    _classCallCheck(this, Filter);
+
+	    var _this = _possibleConstructorReturn(this, (Filter.__proto__ || Object.getPrototypeOf(Filter)).call(this, props));
+
+	    _this.state = {
+	      keyword: ''
+	    };
+
+	    _this.init();
+
+	    _this.handlerKeyDown = _this.handlerKeyDown.bind(_this);
+	    _this.handleChange = _this.handleChange.bind(_this);
+	    return _this;
+	  }
+
+	  _createClass(Filter, [{
+	    key: 'init',
+	    value: function init() {
+	      var keyword = this.getHistoryMsg();
+	      var that = this;
+	      if (keyword) {
+	        setTimeout(function () {
+	          that.sendMsg(keyword);
+	          that.setState({ keyword: keyword });
+	        }, 500);
+	      }
+	    }
+	  }, {
+	    key: 'handlerKeyDown',
+	    value: function handlerKeyDown(e) {
+	      if (e.keyCode === 13) {
+	        this.sendMsg(e.target.value);
+	        this.saveMsg(e.target.value);
+	      }
+	    }
+	  }, {
+	    key: 'handleChange',
+	    value: function handleChange(e) {
+	      this.setState({ keyword: e.target.value });
+	    }
+	  }, {
+	    key: 'sendMsg',
+	    value: function sendMsg(msg) {
+	      this.props.msg.emit('filter', {
+	        value: msg
+	      });
+	    }
+	  }, {
+	    key: 'saveMsg',
+	    value: function saveMsg(msg) {
+	      try {
+	        window.localStorage.setItem('browser-proxy-filter-keyword', msg);
+	      } catch (e) {}
+	    }
+	  }, {
+	    key: 'getHistoryMsg',
+	    value: function getHistoryMsg() {
+	      return window.localStorage.getItem('browser-proxy-filter-keyword');
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'input-group' },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'input-group-addon' },
+	          'filter http request'
+	        ),
+	        _react2.default.createElement('input', { onKeyDown: this.handlerKeyDown, onChange: this.handleChange, className: 'form-control', type: 'text', placeholder: 'filter here', value: this.state.keyword })
+	      );
+	    }
+	  }]);
+
+	  return Filter;
+	}(_react2.default.Component);
+
+	exports.default = Filter;
+
+/***/ },
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -21895,7 +22006,11 @@
 	          null,
 	          data.index
 	        ),
-	        _react2.default.createElement('td', { className: 'data-status' }),
+	        _react2.default.createElement(
+	          'td',
+	          { className: 'data-status' },
+	          data.statusCode
+	        ),
 	        _react2.default.createElement(
 	          'td',
 	          { className: 'data-protocol' },
@@ -21997,7 +22112,7 @@
 	exports.default = Table;
 
 /***/ },
-/* 176 */
+/* 177 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22012,7 +22127,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _formatJson = __webpack_require__(177);
+	var _formatJson = __webpack_require__(178);
 
 	var _formatJson2 = _interopRequireDefault(_formatJson);
 
@@ -22330,7 +22445,7 @@
 	exports.default = ResDetail;
 
 /***/ },
-/* 177 */
+/* 178 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -22626,7 +22741,7 @@
 	exports.default = format;
 
 /***/ },
-/* 178 */
+/* 179 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22687,114 +22802,6 @@
 	}(_react2.default.Component);
 
 	exports.default = msgSender;
-
-/***/ },
-/* 179 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _react = __webpack_require__(2);
-
-	var _react2 = _interopRequireDefault(_react);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var Filter = function (_React$Component) {
-	  _inherits(Filter, _React$Component);
-
-	  function Filter(props) {
-	    _classCallCheck(this, Filter);
-
-	    var _this = _possibleConstructorReturn(this, (Filter.__proto__ || Object.getPrototypeOf(Filter)).call(this, props));
-
-	    _this.state = {
-	      keyword: ''
-	    };
-
-	    _this.init();
-
-	    _this.handlerKeyDown = _this.handlerKeyDown.bind(_this);
-	    _this.handleChange = _this.handleChange.bind(_this);
-	    return _this;
-	  }
-
-	  _createClass(Filter, [{
-	    key: 'init',
-	    value: function init() {
-	      var keyword = this.getHistoryMsg();
-	      var that = this;
-	      if (keyword) {
-	        setTimeout(function () {
-	          that.sendMsg(keyword);
-	          that.setState({ keyword: keyword });
-	        }, 500);
-	      }
-	    }
-	  }, {
-	    key: 'handlerKeyDown',
-	    value: function handlerKeyDown(e) {
-	      if (e.keyCode === 13) {
-	        this.sendMsg(e.target.value);
-	        this.saveMsg(e.target.value);
-	      }
-	    }
-	  }, {
-	    key: 'handleChange',
-	    value: function handleChange(e) {
-	      this.setState({ keyword: e.target.value });
-	    }
-	  }, {
-	    key: 'sendMsg',
-	    value: function sendMsg(msg) {
-	      this.props.msg.emit('filter', {
-	        value: msg
-	      });
-	    }
-	  }, {
-	    key: 'saveMsg',
-	    value: function saveMsg(msg) {
-	      try {
-	        window.localStorage.setItem('browser-proxy-filter-keyword', msg);
-	      } catch (e) {}
-	    }
-	  }, {
-	    key: 'getHistoryMsg',
-	    value: function getHistoryMsg() {
-	      return window.localStorage.getItem('browser-proxy-filter-keyword');
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render() {
-	      return _react2.default.createElement(
-	        'div',
-	        { className: 'input-group' },
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'input-group-addon' },
-	          'filter http request'
-	        ),
-	        _react2.default.createElement('input', { onKeyDown: this.handlerKeyDown, onChange: this.handleChange, className: 'form-control', type: 'text', placeholder: 'filter here', value: this.state.keyword })
-	      );
-	    }
-	  }]);
-
-	  return Filter;
-	}(_react2.default.Component);
-
-	exports.default = Filter;
 
 /***/ }
 /******/ ]);

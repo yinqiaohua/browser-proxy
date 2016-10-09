@@ -126,7 +126,7 @@ class Table extends React.Component {
     return (
       <tr data-id={data.sid} onClick={this.clickHandler}>
         <td>{data.index}</td>
-        <td className='data-status'></td>
+        <td className='data-status'>{data.statusCode}</td>
         <td className='data-protocol'>{data.protocol}</td>
         <td className='data-hostname'>{data.hostname}</td>
         <td className='data-pathname'>{data.pathname}</td>
