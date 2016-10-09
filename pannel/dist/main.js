@@ -77,7 +77,7 @@
 
 	var _resDetail2 = _interopRequireDefault(_resDetail);
 
-	var _msgSender = __webpack_require__(177);
+	var _msgSender = __webpack_require__(178);
 
 	var _msgSender2 = _interopRequireDefault(_msgSender);
 
@@ -21692,6 +21692,10 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _filter = __webpack_require__(179);
+
+	var _filter2 = _interopRequireDefault(_filter);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21706,22 +21710,10 @@
 	  function Header(props) {
 	    _classCallCheck(this, Header);
 
-	    var _this = _possibleConstructorReturn(this, (Header.__proto__ || Object.getPrototypeOf(Header)).call(this, props));
-
-	    _this.state = {
-	      value: ''
-	    };
-	    return _this;
+	    return _possibleConstructorReturn(this, (Header.__proto__ || Object.getPrototypeOf(Header)).call(this, props));
 	  }
 
 	  _createClass(Header, [{
-	    key: 'handlerKeyDown',
-	    value: function handlerKeyDown(e) {
-	      if (e.keyCode === 13) {
-	        console.log(e.target.value);
-	      }
-	    }
-	  }, {
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
@@ -21730,16 +21722,7 @@
 	        _react2.default.createElement(
 	          'div',
 	          { className: 'form-group' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'input-group' },
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'input-group-addon' },
-	              'filter http request'
-	            ),
-	            _react2.default.createElement('input', { onKeyDown: this.handlerKeyDown, className: 'form-control', type: 'text', placeholder: 'filter here' })
-	          )
+	          _react2.default.createElement(_filter2.default, { msg: this.props.msg })
 	        )
 	      );
 	    }
@@ -21828,41 +21811,59 @@
 	        data = Object.assign(data, HostData);
 	        data.index = that.dataset.index;
 	        that.dataset.session[data.sid] = data;
+	        if (that.dataset.keyword && that.dataset.session[data.sid].url.indexOf(that.dataset.keyword) === -1) {
+	          return;
+	        }
+	        var rows = that.state.rows;
+	        rows.push(that.updateRows(data));
 	        that.setState({
-	          rows: [that.state.rows, that.updateRows(data)]
+	          rows: rows
 	        });
 	      });
 	      this.props.msg.on('requestDone', function (data) {
-	        var showResponse = function showResponse(data) {
-	          if (!(data && data.sid)) return;
-	          // Object.assign(that.dataset.session[data.sid], data)
-	          for (var i in data) {
-	            that.dataset.session[data.sid][i] = data[i];
-	          }
-	          if (data.resHeaders && data.resHeaders["content-length"]) {
-	            that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"]);
-	          }
-	          that.dataset.session[data.sid].timespend = that.dataset.session[data.sid].reqEndTime - that.dataset.session[data.sid].reqStartTime;
+	        if (!(data && data.sid)) return;
+	        if (that.dataset.session[data.sid] && data) {
+	          Object.assign(that.dataset.session[data.sid], data);
+	        }
+	        if (data.resHeaders && data.resHeaders["content-length"]) {
+	          that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"]);
+	        }
+	        that.dataset.session[data.sid].timespend = that.dataset.session[data.sid].reqEndTime - that.dataset.session[data.sid].reqStartTime;
 
-	          var $sid = $('tr[data-id="' + data.sid + '"]');
-	          console.log(data.sid, $sid.find('td:eq(0)').text());
-	          $sid.find('td.data-serverip').html(data.hostname);
-	          $sid.find('td.data-status').html(data.statusCode);
-	          $sid.find('td.data-timespend').html(that.dataset.session[data.sid].timespend);
-	          if (data.useHOST) {
-	            $sid.addClass('tr-host-selected');
-	          }
-	          if (data.mapLocal) {
-	            $sid.addClass('tr-maplocal-selected');
-	          }
-	          if ((data.statusCode + '').indexOf('4') === 0) {
-	            $sid.addClass('tr-status-400');
-	          }
-	          $sid.find('td.data-filesize').html(that.dataset.session[data.sid].filesize);
-	        };
-	        showResponse(data);
-	        // var elm = document.querySelector('[data-id="'+data.sid+'"]')
-	        // console.info(data.sid, elm,  $(elm).attr('data-id') );
+	        if (that.dataset.keyword && that.dataset.session[data.sid].url.indexOf(that.dataset.keyword) === -1) {
+	          return;
+	        }
+	        var $sid = $('tr[data-id="' + data.sid + '"]');
+	        $sid.find('td.data-serverip').html(data.hostname);
+	        $sid.find('td.data-status').html(data.statusCode);
+	        $sid.find('td.data-timespend').html(that.dataset.session[data.sid].timespend);
+	        if (data.useHOST) {
+	          $sid.addClass('tr-host-selected');
+	        }
+	        if (data.mapLocal) {
+	          $sid.addClass('tr-maplocal-selected');
+	        }
+	        if ((data.statusCode + '').indexOf('4') === 0) {
+	          $sid.addClass('tr-status-400');
+	        }
+	        $sid.find('td.data-filesize').html(that.dataset.session[data.sid].filesize);
+	      });
+
+	      this.props.msg.on('filter', function (data) {
+	        that.dataset.keyword = data.value;
+	        var list = [];
+	        if (that.dataset.keyword) {
+	          $.each(that.dataset.session, function (idx, item) {
+	            if (item && item.url && item.url.indexOf(that.dataset.keyword) > -1) {
+	              list.push(that.updateRows(item));
+	            }
+	          });
+	        } else {
+	          $.each(that.dataset.session, function (idx, item) {
+	            list.push(that.updateRows(item));
+	          });
+	        }
+	        that.setState({ rows: list });
 	      });
 	    }
 	  }, {
@@ -21875,10 +21876,13 @@
 	        $tr = $($tr);
 	      }
 	      var id = $tr.attr('data-id');
-	      this.props.msg.emit('tableClick', {
-	        id: id,
-	        data: this.dataset.session[id]
-	      });
+	      if ($tr.hasClass('click-selected')) {
+	        this.props.msg.emit('tableClick', {
+	          id: id,
+	          data: this.dataset.session[id]
+	        });
+	      }
+	      $tr.addClass('click-selected').siblings().removeClass('click-selected');
 	    }
 	  }, {
 	    key: 'updateRows',
@@ -22008,6 +22012,10 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
+	var _formatJson = __webpack_require__(177);
+
+	var _formatJson2 = _interopRequireDefault(_formatJson);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -22031,7 +22039,8 @@
 	    _this.state = {
 	      layerDisplay: 'none',
 	      title: '',
-	      tabDetail: ''
+	      tabDetail: '',
+	      method: ''
 	    };
 
 	    // dataset
@@ -22051,7 +22060,8 @@
 	        that.dataset.session.data.cookies = cookies;
 	        that.setState({
 	          title: data.data.url,
-	          layerDisplay: ''
+	          layerDisplay: '',
+	          method: data.data.method
 	        });
 	        var $active = $('[data-role=res-tabs] a.active');
 	        if (!$active.length) {
@@ -22059,13 +22069,29 @@
 	        }
 	        that.tabChangeHandler({ target: $active.get(0) });
 	      });
+
+	      $(document).on('keydown', function (e) {
+	        if (e.shiftKey && e.keyCode === 88) {
+	          // clear();
+	        }
+	        if (!e.shiftKey) {
+	          if (e.keyCode === 38) {
+	            // selectUp();
+	          }
+	          if (e.keyCode === 40) {
+	            // selectDown();
+	          }
+	          if (e.keyCode === 27) {
+	            that.closeClickHandler();
+	          }
+	        }
+	      });
 	    }
 	  }, {
 	    key: 'closeClickHandler',
 	    value: function closeClickHandler() {
 	      this.setState({
-	        layerDisplay: 'none',
-	        title: +new Date()
+	        layerDisplay: 'none'
 	      });
 	    }
 	  }, {
@@ -22078,9 +22104,11 @@
 	        'request-params': 'query',
 	        'request-cookies': 'cookies',
 	        'response-headers': 'resHeaders',
-	        'response-body': 'body'
+	        'response-body': 'body',
+	        'response-json': 'body'
 	      };
 	      var data;
+	      var formatCode = false;
 	      if (!$tar.hasClass('DTTT_button')) {
 	        $tar = $tar.parents('.DTTT_button');
 	        if (!$tar.length) return;
@@ -22090,8 +22118,12 @@
 	      if (!action) return;
 	      if (!(action in keyMaps)) return;
 	      data = this.dataset.session.data[keyMaps[action]];
+	      if (action === 'response-json') {
+	        data = _formatJson2.default.start(data);
+	        formatCode = true;
+	      }
 	      this.setState({
-	        tabDetail: this.buildRequestHeaders(data)
+	        tabDetail: this.buildRequestHeaders(data, formatCode)
 	      });
 	    }
 	  }, {
@@ -22111,11 +22143,18 @@
 	      return cookieData;
 	    }
 	  }, {
+	    key: 'urlClickHandler',
+	    value: function urlClickHandler(e) {
+	      window.open(e.target.innerHTML);
+	    }
+	  }, {
 	    key: 'buildRequestHeaders',
-	    value: function buildRequestHeaders(data, title) {
-	      title = title || '';
+	    value: function buildRequestHeaders(data, noPre) {
 	      var rows = [];
 	      if ($.type(data) === 'string') {
+	        if (noPre) {
+	          return _react2.default.createElement('div', { dangerouslySetInnerHTML: { __html: data } });
+	        }
 	        return _react2.default.createElement(
 	          'pre',
 	          null,
@@ -22142,11 +22181,6 @@
 	      return _react2.default.createElement(
 	        'table',
 	        { className: 'table table-condensed' },
-	        _react2.default.createElement(
-	          'caption',
-	          null,
-	          title
-	        ),
 	        _react2.default.createElement(
 	          'thead',
 	          null,
@@ -22202,7 +22236,13 @@
 	          _react2.default.createElement(
 	            'h3',
 	            { className: 'response-url-title' },
-	            this.state.title
+	            this.state.method,
+	            ' ',
+	            _react2.default.createElement(
+	              'span',
+	              { onClick: this.urlClickHandler },
+	              this.state.title
+	            )
 	          ),
 	          _react2.default.createElement(
 	            'div',
@@ -22260,6 +22300,15 @@
 	                      null,
 	                      'Response Content'
 	                    )
+	                  ),
+	                  _react2.default.createElement(
+	                    'a',
+	                    { 'data-action': 'response-json', className: 'DTTT_button' },
+	                    _react2.default.createElement(
+	                      'span',
+	                      null,
+	                      'JSON'
+	                    )
 	                  )
 	                )
 	              )
@@ -22282,6 +22331,302 @@
 
 /***/ },
 /* 177 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+	var js_code = {};
+	js_code.css = function () {
+	  /*
+	  ul li{
+	    margin-left: 17px;
+	  }
+	  ul.hover{
+	    background: #dfdfdf;
+	  }
+	  .btn{padding-right:5px;cursor:pointer;padding:1px 3px;margin-left: -10px;color:red;}
+	  .omit{color:gray;}
+	  .hide{display:none;}
+	  pre{
+	    background: #efefef;
+	    margin:10px;
+	    word-wrap: break-word;
+	    word-break: normal;
+	    white-space: pre-wrap;
+	  }
+	  ul{
+	    list-style:none;
+	    border-left: dashed 1px #dfdfdf;
+	  }
+	  .key{
+	    font-weight: bold;
+	  }
+	  .str{
+	    color:rgb(184,3,3);
+	  }
+	  .num{
+	    color:blue;
+	  }
+	  .bool{
+	    color: green;
+	  }
+	  .null{
+	    color:#888;
+	  }
+	   */
+	};
+
+	var util = {
+
+	  /**
+	   * 从function的注释取代码
+	   */
+	  getHTMLFromNote: function getHTMLFromNote(fn) {
+	    var _str = fn.toString(),
+	        s_pos = _str.indexOf("/*") + 2,
+	        e_pos = _str.lastIndexOf("*/");
+	    return s_pos < 0 || e_pos < 0 ? "" : _str.substring(s_pos, e_pos);
+	  },
+
+	  /**
+	   * 编码HTML
+	   */
+	  escapeHTML: function escapeHTML(str) {
+	    if (typeof str === 'string') {
+	      var reg = /^https?:\/\/.*$/;
+	      str = str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	      if (reg.test(str)) {
+	        str = '<a href="' + str + '" target="_blank">' + str + '</a>';
+	      }
+	    }
+	    return str;
+	  },
+
+	  /**
+	   * 编码Values值
+	   */
+	  escapeVALUE: function escapeVALUE(val) {
+	    if (typeof val === 'number') {
+	      return '<span class="num">' + this.escapeHTML(val) + '</span>';
+	    } else if (typeof val === 'string') {
+	      return '<span class="str">"' + this.escapeHTML(val) + '"</span>';
+	    } else if (typeof val === 'boolean') {
+	      return '<span class="bool">' + this.escapeHTML(val) + '</span>';
+	    } else {
+	      return '<span class="null">' + val + '</span>';
+	    }
+	  }
+	};
+
+	function FormatJSON(config) {
+	  config = config || {};
+	  this.fn_start = '';
+	  this.fn_end = '';
+	}
+
+	FormatJSON.prototype = {
+	  /**
+	   * 格式化Object对象
+	   * @param {Object} obj
+	   * @param {Number} deep
+	   * @param {String} _html
+	   */
+	  FormatObject: function FormatObject(obj, deep, _html) {
+	    deep++;
+	    var obj_len = 0;
+	    for (var i in obj) {
+	      obj_len++;
+	    }
+	    var current_index = 0;
+	    var is_last;
+	    for (var i in obj) {
+	      current_index++;
+	      is_last = current_index === obj_len ? true : false;
+	      var col = obj[i];
+	      if (jQuery.isArray(col)) {
+	        _html.push(['<li>',
+	        // out_blank(deep),
+	        '<span class="btn">-</span>', '"', '<span class="key">' + util.escapeHTML(i) + '</span>', '": ', '<span class="mark_s">[</span>', '<span class="omit hide">...]</span>', this.FormatArray(col, deep, []),
+	        // out_blank(deep),
+	        '<span class="mark_e">]</span>', is_last ? '' : '<span class="comma">,</span>', '</li>'].join(''));
+	      } else if ((typeof col === "undefined" ? "undefined" : _typeof(col)) === 'object' && col && col.constructor === Object) {
+	        _html.push(['<li>',
+	        // out_blank(deep),
+	        '<span class="btn">-</span>', '"', '<span class="key">' + util.escapeHTML(i) + '</span>', '": ', '<span class="mark_s">{</span>', '<span class="omit hide">...}</span>', this.FormatObject(col, deep, []),
+	        // out_blank(deep),
+	        '<span class="mark_e">}</span>', is_last ? '' : '<span class="comma">,</span>', '</li>'].join(''));
+	      } else if (typeof col === 'function') {
+	        _html.push(['<li>', '"', '<span class="key">' + util.escapeHTML(i) + '</span>', '": ', util.escapeVALUE('function'), is_last ? '' : ',', '</li>'].join(''));
+	      } else {
+	        _html.push(['<li>',
+	        // out_blank(deep),
+	        '"', '<span class="key">' + util.escapeHTML(i) + '</span>', '": ', util.escapeVALUE(col), is_last ? '' : ',', '</li>'].join(''));
+	      }
+	    }
+	    return ['<ul>', _html.join(''), '</ul>'].join('');
+	  },
+
+	  /**
+	   * 格式化Array对象
+	   * @param {Object} obj
+	   * @param {Number} deep
+	   * @param {String} _html
+	   */
+	  FormatArray: function FormatArray(arr, deep, _html) {
+	    deep++;
+	    var len = arr.length,
+	        is_last,
+	        self = this;
+	    jQuery(arr).each(function (index, val) {
+	      is_last = len === index + 1;
+	      if (jQuery.isArray(val)) {
+	        _html.push(['<li>',
+	        // out_blank(deep),
+	        '<span class="btn">-</span>', '<span class="mark_s">[</span>', '<span class="omit hide">...]</span>', self.FormatArray(val, deep, []),
+	        // out_blank(deep),
+	        '<span class="mark_e">]</span>', is_last ? '' : '<span class="comma">,</span>', '</li>'].join(''));
+	      } else if ((typeof val === "undefined" ? "undefined" : _typeof(val)) === 'object' && val && val.constructor === Object) {
+	        _html.push(['<li>',
+	        // out_blank(deep),
+	        '<span class="btn">-</span>', '<span class="mark_s">{</span>', '<span class="omit hide">...}</span>', self.FormatObject(val, deep, []),
+	        // out_blank(deep),
+	        '<span class="mark_e">}</span>', is_last ? '' : '<span class="comma">,</span>', '</li>'].join(''));
+	      } else if (typeof val === 'string' || typeof val === 'number') {
+	        _html.push(['<li>',
+	        // out_blank(deep),
+	        util.escapeHTML(val), is_last ? '' : '<span class="comma">,</span>', '</li>'].join(''));
+	      }
+	    });
+
+	    return ['<ul>', _html.join(''), '</ul>'].join('');
+	  },
+
+	  /**
+	   * 将JSON数据转换成html
+	   * @param  {Object} data
+	   * @return {String}
+	   */
+	  buildHTML: function buildHTML(data) {
+	    if ((typeof data === "undefined" ? "undefined" : _typeof(data)) === 'object' && data.constructor === Object) {
+	      var ss = ['<li>',
+	      // out_blank(deep),
+	      '<span class="btn">-</span>', this.fn_start + '{', '<span class="omit hide">...}' + this.fn_end + '</span>', this.FormatObject(data, 0, []),
+	      // out_blank(deep),
+	      '<span class="mark_e">}' + this.fn_end + '</span>', '</li>'].join('');
+	      return '<ul>' + ss + '</ul>';
+	    } else if ((typeof data === "undefined" ? "undefined" : _typeof(data)) === 'object' && data.constructor === Array) {
+	      var ss = ['<li>',
+	      // out_blank(deep),
+	      '<span class="btn">-</span>', this.fn_start + '[', '<span class="omit hide">...]' + this.fn_end + '</span>', this.FormatArray(data, 0, []),
+	      // out_blank(deep),
+	      '<span class="mark_e">]' + this.fn_end + '</span>', '</li>'].join('');
+	      return '<ul>' + ss + '</ul>';
+	    }
+	  },
+
+	  /**
+	   * 解析json 字符串
+	   * @param  {String} str_html
+	   */
+	  parse: function parse(str_html) {
+	    var reg = /(.*?)(\{[\s\S]+\})(\);?)?/,
+	        json;
+	    if (str_html.indexOf('{') === 0 || str_html.indexOf('[') === 0) {
+	      this.fn_start = '';
+	      this.fn_end = '';
+	      try {
+	        json = JSON.parse(str_html);
+	      } catch (e) {
+	        return 'Illegal format';
+	      }
+	    } else if (reg.test(str_html)) {
+	      var mch = RegExp.$2;
+	      var fn_start = RegExp.$1;
+	      var fn_end = RegExp.$3;
+	      this.fn_start = fn_start || '';
+	      this.fn_end = fn_end || '';
+	      try {
+	        json = JSON.parse(mch);
+	      } catch (e) {
+	        return 'Illegal format';
+	      }
+	    }
+	    return json;
+	  },
+
+	  /**
+	   * 初始化样式
+	   */
+	  buildCss: function buildCss() {
+	    var id = 'f22fd1-71394756d-b854ad2c196e-7b198';
+	    if (jQuery('#' + id).length) return;
+	    var css_val = util.getHTMLFromNote(js_code.css);
+	    var style = document.createElement('style');
+	    style.type = 'text/css';
+	    style.innerHTML = css_val;
+	    style.id = id;
+	    document.head.appendChild(style);
+	  },
+
+	  /**
+	   * 添加用户操作事件
+	   */
+	  addEvent: function addEvent() {
+	    jQuery(document).off('click.formatJSON').on('click.formatJSON', '.btn', function (e) {
+	      var tar = e.target;
+	      var $ul = jQuery(tar).siblings('ul');
+	      var $omit = jQuery(tar).siblings('.omit');
+	      var $m_e = jQuery(tar).siblings('.mark_e');
+	      var $comma = jQuery(tar).siblings('.comma');
+	      if ($ul.is(':visible')) {
+	        $ul.addClass('hide');
+	        $omit.removeClass('hide');
+	        $m_e.addClass('hide');
+	        $comma.addClass('hide');
+	        jQuery(tar).html('+');
+	      } else {
+	        $ul.removeClass('hide');
+	        $omit.addClass('hide');
+	        $m_e.removeClass('hide');
+	        $comma.removeClass('hide');
+	        jQuery(tar).html('-');
+	      }
+	    });
+	  },
+
+	  /**
+	   * 入口
+	   */
+	  start: function start(parseData, $targetDom) {
+	    var data;
+
+	    data = this.parse(parseData);
+	    if (data === 'Illegal format') {
+	      return data;
+	    }
+
+	    var jsonHTML = this.buildHTML(data);
+
+	    this.buildCss();
+	    this.addEvent();
+
+	    return jsonHTML;
+	  }
+
+	};
+
+	var format = new FormatJSON();
+
+	exports.default = format;
+
+/***/ },
+/* 178 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22323,13 +22668,10 @@
 	      jQuery.getScript('http://127.0.0.1:9000/socket.io/socket.io.js').done(function () {
 	        var socket = io('http://localhost:9000');
 	        socket.on('request', function (data) {
-	          window.lastData = data;
 	          that.props.msg.emit('requestStart', data);
 	        });
 
 	        socket.on('response', function (data) {
-	          // var elm = document.querySelector('[data-id="'+data.sid+'"]')
-	          // console.log(data.sid, elm,  $(elm).attr('data-id') )
 	          that.props.msg.emit('requestDone', data);
 	        });
 	      });
@@ -22345,6 +22687,114 @@
 	}(_react2.default.Component);
 
 	exports.default = msgSender;
+
+/***/ },
+/* 179 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Filter = function (_React$Component) {
+	  _inherits(Filter, _React$Component);
+
+	  function Filter(props) {
+	    _classCallCheck(this, Filter);
+
+	    var _this = _possibleConstructorReturn(this, (Filter.__proto__ || Object.getPrototypeOf(Filter)).call(this, props));
+
+	    _this.state = {
+	      keyword: ''
+	    };
+
+	    _this.init();
+
+	    _this.handlerKeyDown = _this.handlerKeyDown.bind(_this);
+	    _this.handleChange = _this.handleChange.bind(_this);
+	    return _this;
+	  }
+
+	  _createClass(Filter, [{
+	    key: 'init',
+	    value: function init() {
+	      var keyword = this.getHistoryMsg();
+	      var that = this;
+	      if (keyword) {
+	        setTimeout(function () {
+	          that.sendMsg(keyword);
+	          that.setState({ keyword: keyword });
+	        }, 500);
+	      }
+	    }
+	  }, {
+	    key: 'handlerKeyDown',
+	    value: function handlerKeyDown(e) {
+	      if (e.keyCode === 13) {
+	        this.sendMsg(e.target.value);
+	        this.saveMsg(e.target.value);
+	      }
+	    }
+	  }, {
+	    key: 'handleChange',
+	    value: function handleChange(e) {
+	      this.setState({ keyword: e.target.value });
+	    }
+	  }, {
+	    key: 'sendMsg',
+	    value: function sendMsg(msg) {
+	      this.props.msg.emit('filter', {
+	        value: msg
+	      });
+	    }
+	  }, {
+	    key: 'saveMsg',
+	    value: function saveMsg(msg) {
+	      try {
+	        window.localStorage.setItem('browser-proxy-filter-keyword', msg);
+	      } catch (e) {}
+	    }
+	  }, {
+	    key: 'getHistoryMsg',
+	    value: function getHistoryMsg() {
+	      return window.localStorage.getItem('browser-proxy-filter-keyword');
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'input-group' },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'input-group-addon' },
+	          'filter http request'
+	        ),
+	        _react2.default.createElement('input', { onKeyDown: this.handlerKeyDown, onChange: this.handleChange, className: 'form-control', type: 'text', placeholder: 'filter here', value: this.state.keyword })
+	      );
+	    }
+	  }]);
+
+	  return Filter;
+	}(_react2.default.Component);
+
+	exports.default = Filter;
 
 /***/ }
 /******/ ]);

@@ -18,10 +18,6 @@ body{
   overflow: scroll;
   top: 0;
 }
-/*.table-condensed{
-  width: 50%;
-  float: left;
-}*/
 .table-condensed caption{
   font-size: 30px;
 }
@@ -47,10 +43,7 @@ tr.tr-maplocal-selected,tr.tr-maplocal-selected td{
 tr.tr-status-400,tr.tr-status-400 td{
   color: red !important;
 }
-#data-list tr{
-  cursor: pointer;
-}
-#data-list tr.click-selected, #data-list tr.click-selected td{
+tr.click-selected,tr.click-selected td{
   background: #f7debe !important;
 }
 .filter-control{
@@ -71,7 +64,7 @@ tr.tr-status-400,tr.tr-status-400 td{
 }
 
 .dataTables_wrapper .DTTT_container .DTTT_button.active {
-  background: #7aceef !important;
+  background: #f7c130 !important;
 }
 
 /* normal style */

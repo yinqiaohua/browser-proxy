@@ -7,16 +7,13 @@ class msgSender extends React.Component {
   }
   init(){
     var that = this;
-    jQuery.getScript('http://127.0.0.1:9000/socket.io/socket.io.js').done(function(){
+    jQuery.getScript('http://127.0.0.1:9000/socket.io/socket.io.js').done(()=>{
       var socket = io('http://localhost:9000');
-      socket.on('request', function (data) {
-        window.lastData = data;
+      socket.on('request', data=>{
         that.props.msg.emit('requestStart', data);
       });
 
-      socket.on('response', function (data) {
-        // var elm = document.querySelector('[data-id="'+data.sid+'"]')
-        // console.log(data.sid, elm,  $(elm).attr('data-id') )
+      socket.on('response', data=>{
         that.props.msg.emit('requestDone', data);
       });
     });

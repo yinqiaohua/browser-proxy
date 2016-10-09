@@ -39,47 +39,69 @@ class Table extends React.Component {
 
   init(){
     var that = this;
-    this.props.msg.on('requestStart', function(data){
+    this.props.msg.on('requestStart', data=>{
       that.dataset.index ++
       var HostData = that.getUrlHostData(data.url)
       data = Object.assign(data, HostData)
       data.index = that.dataset.index
       that.dataset.session[data.sid] = data
+      if (
+        that.dataset.keyword &&
+        that.dataset.session[data.sid].url.indexOf(that.dataset.keyword)===-1){
+        return;
+      }
+      var rows = that.state.rows
+      rows.push(that.updateRows(data))
       that.setState({
-        rows: [that.state.rows, that.updateRows(data)]
+        rows: rows
       })
     })
-    this.props.msg.on('requestDone', function(data){
-      var showResponse = function(data){
-        if ( !(data && data.sid) ) return;
-        // Object.assign(that.dataset.session[data.sid], data)
-        for(var i in data){
-          that.dataset.session[data.sid][i] = data[i]
-        }
-        if (data.resHeaders && data.resHeaders["content-length"]) {
-          that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"])
-        }
-        that.dataset.session[data.sid].timespend = that.dataset.session[data.sid].reqEndTime- that.dataset.session[data.sid].reqStartTime;
-
-        var $sid = $('tr[data-id="' + data.sid + '"]')
-        console.log(data.sid, $sid.find('td:eq(0)').text())
-        $sid.find('td.data-serverip').html( data.hostname )
-        $sid.find('td.data-status').html( data.statusCode )
-        $sid.find('td.data-timespend').html( that.dataset.session[data.sid].timespend )
-        if (data.useHOST) {
-          $sid.addClass('tr-host-selected')
-        }
-        if (data.mapLocal) {
-          $sid.addClass('tr-maplocal-selected')
-        }
-        if ( (data.statusCode+'').indexOf('4')===0 ) {
-          $sid.addClass('tr-status-400')
-        }
-        $sid.find('td.data-filesize').html( that.dataset.session[data.sid].filesize )
+    this.props.msg.on('requestDone', data=>{
+      if ( !(data && data.sid) ) return;
+      if ( that.dataset.session[data.sid] && data) {
+        Object.assign(that.dataset.session[data.sid], data)
       }
-      showResponse(data)
-      // var elm = document.querySelector('[data-id="'+data.sid+'"]')
-      // console.info(data.sid, elm,  $(elm).attr('data-id') );
+      if (data.resHeaders && data.resHeaders["content-length"]) {
+        that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"])
+      }
+      that.dataset.session[data.sid].timespend = that.dataset.session[data.sid].reqEndTime- that.dataset.session[data.sid].reqStartTime;
+
+      if (
+        that.dataset.keyword &&
+        that.dataset.session[data.sid].url.indexOf(that.dataset.keyword)===-1){
+        return;
+      }
+      var $sid = $('tr[data-id="' + data.sid + '"]')
+      $sid.find('td.data-serverip').html( data.hostname )
+      $sid.find('td.data-status').html( data.statusCode )
+      $sid.find('td.data-timespend').html( that.dataset.session[data.sid].timespend )
+      if (data.useHOST) {
+        $sid.addClass('tr-host-selected')
+      }
+      if (data.mapLocal) {
+        $sid.addClass('tr-maplocal-selected')
+      }
+      if ( (data.statusCode+'').indexOf('4')===0 ) {
+        $sid.addClass('tr-status-400')
+      }
+      $sid.find('td.data-filesize').html( that.dataset.session[data.sid].filesize )
+    })
+
+    this.props.msg.on('filter', data=>{
+      that.dataset.keyword = data.value;
+      var list = [];
+      if (that.dataset.keyword) {
+        $.each(that.dataset.session, (idx, item)=>{
+          if (item && item.url && item.url.indexOf(that.dataset.keyword)>-1) {
+            list.push( that.updateRows(item) )
+          }
+        })
+      }else{
+        $.each(that.dataset.session, (idx, item)=>{
+          list.push( that.updateRows(item) )
+        })
+      }
+      that.setState({rows: list})
     })
   }
 
@@ -91,10 +113,13 @@ class Table extends React.Component {
       $tr = $( $tr )
     }
     var id = $tr.attr('data-id')
-    this.props.msg.emit('tableClick', {
-      id: id,
-      data: this.dataset.session[id]
-    })
+    if ($tr.hasClass('click-selected')){
+      this.props.msg.emit('tableClick', {
+        id: id,
+        data: this.dataset.session[id]
+      })
+    }
+    $tr.addClass('click-selected').siblings().removeClass('click-selected')
   }
 
   updateRows(data){
