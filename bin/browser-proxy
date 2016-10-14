@@ -11,6 +11,9 @@ if (conf) list = conf.split(' ');
 
 list.forEach(function(item, idx){
   var key = idx + 1;
+  if (key===1) {
+    config[item] = null;
+  }
   if (key%2===0){
     config[tmpKey] = item;
   }else{
@@ -18,8 +21,13 @@ list.forEach(function(item, idx){
   }
 });
 
-var app = require('../index');
 if (config['-c']) {
   config['-c'] = path.resolve(config['-c'])
 }
-app(config);
+if (config.hasOwnProperty('-v')) {
+  var json = require( '../package.json'  )
+  console.log(json.version)
+}else{
+  var app = require('../index');
+  app(config);
+}
