@@ -4,54 +4,43 @@
  * @description a proxy for mac browser
  * @source https://github.com/zobor/browser-proxy
  */
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var http = require('http');
 var https = require('https');
-var r = require('request');
-var R = require('request');
+var requestNoProxy = require('request');
+var requestProxy = require('request');
 var net = require('net');
 var fs = require('fs');
 var extend = require('node.extend');
 var URL = require('url');
-var AppPort = '8989';
+var AppPort = '8787';
 var os = require('os');
-var util = require('./common/util');
+var util = require('./modules/util');
 var dns = require('dns');
 var config = {};
-var colors = require('colors');
 var path = require('path');
 var chokidar = require('chokidar');
 var zlib = require('zlib');
 
+// 输出READ ME信息
 util.showLog([
   [
-    '',
-    '',
     '---------- READ ME ----------',
     'Externel Proxy Setting:'.bold,
     'export http_proxy_browser=http://example.com:port'.underline,
     'app support config:'.bold,
     '* browser-proxy -p 8888'.underline,
     '* browser-proxy -c ./config.js'.underline,
-    '---------- READ ME ----------\n\n',
-    ''
+    '---------- READ ME ----------'
   ].join('\n')
-, 'green']);
+, 'red']);
 
+// 设置external Proxy
 if (process.env.http_proxy_browser) {
-  R = R.defaults({'proxy':process.env.http_proxy_browser});
-  util.showLog(['Current Extenal Proxy:', 'green'],[ process.env.http_proxy_browser, 'green.underline'])
+  requestProxy = requestProxy.defaults({'proxy':process.env.http_proxy_browser});
+  util.showLog(['Current External Proxy:', 'green'],[ process.env.http_proxy_browser, 'green.underline'])
 }
 
-r.defaults({
-  strictSSL: false,
-  rejectUnauthorized: false
-});
-R.defaults({
-  strictSSL: false,
-  rejectUnauthorized: false
-});
-
+// https 配置
 var httpServer;
 var httpsServer;
 var INTERNAL_HTTPS_PORT;
@@ -60,15 +49,21 @@ var HTTPS_CERT = path.join(__dirname, 'data', 'cert.pem');
 var configFilePath = './config.js';
 
 
-// ----------------- socket.io -----------------
 // UI面板
-var Msg;
+// var pannelMsg;
+// require('./modules/pannel.js').getIOMsg({}).done(function(socket){
+//   pannelMsg = socket;
+//   pannelMsg.emit('init', {t: +new Date()})
+// });
+
+var pannelMsg;
 (function(){
-
-
 var app = require('http').createServer(handler)
 var io = require('socket.io')(app);
 var fs = require('fs');
+var deferred = require('deferred');
+var def = deferred();
+
 
 app.listen(9000);
 
@@ -89,19 +84,22 @@ function handler (req, res) {
       res.writeHead(500);
       return res.end('Error loading index.html');
     }
-
     res.writeHead(200);
     res.end(data);
   });
 }
 
 io.on('connection', function (socket) {
-  Msg = socket;
+  pannelMsg = socket;
+  // def.resolve(socket);
+  // socket.on('test', function(data){
+  //   console.log(data)
+  // })
 });
 
 })();
 
-// ----------------- socket.io -----------------
+
 
 // 监听配置文件变化
 function watchConfigUpdate(options){
@@ -164,7 +162,9 @@ function createHttpsServer(){
   httpsServer.on('listening', function(){
     INTERNAL_HTTPS_PORT = httpsServer.address().port;
   });
-  httpsServer = httpsServer.listen(INTERNAL_HTTPS_PORT);
+  if (INTERNAL_HTTPS_PORT) {
+    httpsServer = httpsServer.listen(INTERNAL_HTTPS_PORT);
+  }
 
   proxyHttps();
 }
@@ -215,8 +215,10 @@ function app(req, res){
   // delete gzip
   delete req.headers['accept-encoding'];
   var urlParse = URL.parse(req.url, true);
-  if (Msg && Msg.emit) {
-    Msg.emit('request', {
+  if (pannelMsg && pannelMsg.emit) {
+    // console.log('request', req.url)
+    // pannelMsg.emit('request', req.url)
+    pannelMsg.emit('request', {
       url: req.url,
       sid: sid,
       query: urlParse.query,
@@ -428,8 +430,8 @@ function responseEmit(data){
   param.reqEndTime = (+new Date);
   param.postBody = data.postBody;
   param.statusCode = data.statusCode;
-  if (Msg && Msg.emit) {
-    Msg.emit('response', param);
+  if (pannelMsg && pannelMsg.emit) {
+    pannelMsg.emit('response', param);
   }
 }
 
@@ -437,14 +439,14 @@ function responseEmit(data){
 function sendRequest(req, res, urlParse, item, headers){
   item = item || {};
   headers = headers || {};
-  var request = r, useHOST = false;
+  var request = requestNoProxy, useHOST = false;
   // in noProxy or in hosts
   if ( config.noProxy.indexOf( util.getTopDomain(urlParse.hostname) )>-1 ||
     config.hosts[urlParse.hostname]
   ) {
-    request = r;
+    request = requestNoProxy;
   }else{
-    request = R;
+    request = requestProxy;
   }
   var requestConfig = {
     url: req.url,
