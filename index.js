@@ -327,6 +327,16 @@ function app(req, res){
     }
     // 返回的请求头
     if (item.responseHeaders) {
+      if (item.responseHeaders['Access-Control-Allow-Origin']==='*?'){
+        if (req.headers.referer){
+          var rewriteHeadOrigin = req.headers.referer.match(/(http(s)?:\/\/[^\/]+)/);
+          if (rewriteHeadOrigin && rewriteHeadOrigin.length) {
+            item.responseHeaders['Access-Control-Allow-Origin'] = rewriteHeadOrigin[0];
+          }else{
+            item.responseHeaders['Access-Control-Allow-Origin'] = '*';
+          }
+        }
+      }
       resHeaders = extend(resHeaders, item.responseHeaders);
     }
     // 指定返回http code
