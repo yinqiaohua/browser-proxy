@@ -49,13 +49,6 @@ var HTTPS_CERT = path.join(__dirname, 'data', 'cert.pem');
 var configFilePath = './config.js';
 
 
-// UI面板
-// var pannelMsg;
-// require('./modules/pannel.js').getIOMsg({}).done(function(socket){
-//   pannelMsg = socket;
-//   pannelMsg.emit('init', {t: +new Date()})
-// });
-
 var pannelMsg;
 (function(){
 var app = require('http').createServer(handler)
@@ -91,10 +84,6 @@ function handler (req, res) {
 
 io.on('connection', function (socket) {
   pannelMsg = socket;
-  // def.resolve(socket);
-  // socket.on('test', function(data){
-  //   console.log(data)
-  // })
 });
 
 })();
@@ -214,10 +203,12 @@ function app(req, res){
 
   // delete gzip
   delete req.headers['accept-encoding'];
+
+  if (!req.headers.Cookie && req.headers.cookie){
+    req.headers.Cookie = req.headers.cookie;
+  }
   var urlParse = URL.parse(req.url, true);
   if (pannelMsg && pannelMsg.emit) {
-    // console.log('request', req.url)
-    // pannelMsg.emit('request', req.url)
     pannelMsg.emit('request', {
       url: req.url,
       sid: sid,
@@ -241,13 +232,14 @@ function app(req, res){
     var content;
     var regx;
     var localFile;
-    var matchFiles;
+    var matchFiles = [];
     var resHeaders = {};
     var tmp;
-    var _matchFiles = [];
     var isFileExist = true;
     var basePath='';
     var itemRegx, itemRegxStr;
+    var basepathMatch;
+    var comboString;
     // 正则匹配
     if (item.regx) {
       if (typeof item.regx==='string'){
@@ -268,28 +260,37 @@ function app(req, res){
       regx = new RegExp(regx, 'ig');
       isMatch = regx.test(req.url);
     }
-    // 文件合并服务
-    else if(item.regxCombo){
-      regx = item.regxCombo.replace(/\//g,'\/').replace(/\./g,'\.');
-      regx = new RegExp(regx, 'ig');
-      isMatch = regx.test(req.url);
-      matchFiles = RegExp.$1.replace(new RegExp(item.replacePath, 'ig') || '', '');
-      if (matchFiles){
-        matchFiles = matchFiles.split(',');
-        if (matchFiles && matchFiles.length){
-          basePath = matchFiles[0].split('/');
-          basePath.pop();
-          basePath = basePath.join('/') + '/';
-        }
-        _matchFiles = [];
-        matchFiles.forEach(function(filename, idx){
-          if (idx>0){
-            _matchFiles.push(item.localPath + basePath + filename);
+    else if( item.regxCombo ){
+      if (typeof item.regxCombo==='string') {
+        item.regxCombo = item.regxCombo.replace(/\//g,'\/').replace(/\./g,'\.');
+        item.regxCombo = new RegExp(item.regxCombo, 'i');
+      }
+      isMatch = req.url.match(item.regxCombo);
+      if (isMatch && isMatch.length===2){
+        comboString = isMatch[1];
+        isMatch = true;
+      }else{
+        isMatch = false;
+      }
+      if (isMatch && comboString) {
+        var comboList = comboString.split(',');
+        comboList.forEach(function(sCombo, idx){
+          var singleFilePath;
+          // 含有/的部分
+          if (sCombo && sCombo.indexOf('/')>-1) {
+            basepathMatch = sCombo.match(/(\/[^\/]+)+\//);
+            if (basepathMatch && basepathMatch.length===2) {
+              basePath = basepathMatch[0];
+            }
+            singleFilePath = sCombo;
           }else{
-            _matchFiles.push(item.localPath + filename);
+            singleFilePath = basePath + sCombo;
           }
+          if ( item.comboMaps && item.comboMaps[basePath]) {
+            singleFilePath = singleFilePath.replace(basePath, item.comboMaps[basePath]);
+          }
+          matchFiles.push(singleFilePath);
         });
-        matchFiles = _matchFiles;
       }
     }
     if (!isMatch) return;
@@ -315,7 +316,7 @@ function app(req, res){
       }
     }
     // 合并服务
-    if (item.regxCombo && item.localPath && matchFiles && matchFiles.length) {
+    if (item.regxCombo && matchFiles && matchFiles.length) {
       content = [];
       matchFiles.forEach(function(filepath, idx){
         content.push( fs.readFileSync(filepath, 'utf-8') );
@@ -501,7 +502,6 @@ function sendRequest(req, res, urlParse, item, headers){
     responseEmit(_data);
   };
   if (req.method === 'GET') {
-    // console.log('GET ' + req.url);
     request.get(requestConfig, function(err,response, body){
       if (err || !(response && response.headers) ) return;
       if ( showResponseText(response.headers) ) {
@@ -574,7 +574,7 @@ function proxyHttps(){
       socket.end();
     });
     netClient.on('error', function(err){
-      console.error('netClient error ' + err.message);
+      // console.error('netClient error ' + err.message);
       socket.end();
     });
   });
