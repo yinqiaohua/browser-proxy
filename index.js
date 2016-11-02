@@ -26,7 +26,7 @@ util.showLog([
   [
     '---------- READ ME ----------',
     'Externel Proxy Setting:'.bold,
-    'export http_proxy_browser=http://example.com:port'.underline,
+    'export bproxy=http://example.com:port'.underline,
     'app support config:'.bold,
     '* browser-proxy -p 8888'.underline,
     '* browser-proxy -c ./config.js'.underline,
@@ -35,9 +35,9 @@ util.showLog([
 , 'red']);
 
 // 设置external Proxy
-if (process.env.http_proxy_browser) {
-  requestProxy = requestProxy.defaults({'proxy':process.env.http_proxy_browser});
-  util.showLog(['Current External Proxy:', 'green'],[ process.env.http_proxy_browser, 'green.underline'])
+if (process.env.bproxy) {
+  requestProxy = requestProxy.defaults({'proxy':process.env.bproxy});
+  util.showLog(['Current External Proxy:', 'green'],[ process.env.bproxy, 'green.underline'])
 }
 
 // https 配置
@@ -251,7 +251,7 @@ function app(req, res){
       }
     }
     // indexOf 查找
-    else if(item.indexof){
+    else if(item.indexof && (!item.regxCombo && !item.regxPath)){
       isMatch = req.url.indexOf(item.indexof) > -1;
     }
     // 正则匹配URL目录
@@ -261,6 +261,9 @@ function app(req, res){
       isMatch = regx.test(req.url);
     }
     else if( item.regxCombo ){
+      if ( item.indexof && req.url.indexOf(item.indexof)===-1 ) {
+        return;
+      }
       if (typeof item.regxCombo==='string') {
         item.regxCombo = item.regxCombo.replace(/\//g,'\/').replace(/\./g,'\.');
         item.regxCombo = new RegExp(item.regxCombo, 'i');
@@ -442,7 +445,9 @@ function sendRequest(req, res, urlParse, item, headers){
   headers = headers || {};
   var request = requestNoProxy, useHOST = false;
   // in noProxy or in hosts
-  if ( config.noProxy.indexOf( util.getTopDomain(urlParse.hostname) )>-1 ||
+  if (
+    config.noProxy.indexOf( util.getTopDomain(urlParse.hostname) )>-1 ||
+    config.noProxy.indexOf(urlParse.hostname) > -1 ||
     config.hosts[urlParse.hostname]
   ) {
     request = requestNoProxy;
