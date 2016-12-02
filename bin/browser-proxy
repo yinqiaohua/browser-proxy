@@ -1,33 +1,49 @@
 #!/usr/bin/env node
+'use strict';
+var http           = require('http')
+var colors         = require('colors')
+var requestHandler = require('../modules/request-handler.js')
+var connectHandler = require('../modules/connect-handler.js')
+var program        = require('commander')
+var packageJson    = require('../package.json')
+var server         = new http.Server()
+var AppPort        = 8787
+var URL = require('url')
+var util = require('../modules/util')
 
-var args =process.argv.slice(2);
-var conf = args.join(' ');
-var path = require('path');
+program.version(packageJson.version)
+    .option('-c, --config [value]', 'config file path')
+    .option('-p, --port [value]', 'proxy port')
+    .parse(process.argv)
 
-var config = {};
-var list = [];
-var tmpKey = '0';
-if (conf) list = conf.split(' ');
+AppPort = program.port || AppPort
 
-list.forEach(function(item, idx){
-  var key = idx + 1;
-  if (key===1) {
-    config[item] = null;
-  }
-  if (key%2===0){
-    config[tmpKey] = item;
-  }else{
-    tmpKey = item;
-  }
+server.listen(AppPort, () => {
+    console.log(colors.green('z-proxy已启动，端口: ' + AppPort))
+    server.on('error', (e) => {
+        console.error(colors.red(e))
+    })
+
+    server.on('request', (req, res) => {
+        var sid = util.GUID();
+        req.__sid__ = sid
+        requestHandler(req, res)
+    })
+
+    // tunneling for https
+    server.on('connect', (req, socket, head) => {
+        var sid = util.GUID();
+        req.__sid__ = sid
+        connectHandler(req, socket, head)
+    })
+
+    server.on('upgrade', function(req, socket, head) {
+        console.log(res.url)
+        // upgradeHandler(req, socket, head, ssl);
+    });
+})
+
+
+process.on('uncaughtException', function(err){
+    console.error(colors.red('uncaughtException: ' + err.message))
 });
-
-if (config['-c']) {
-  config['-c'] = path.resolve(config['-c'])
-}
-if (config.hasOwnProperty('-v')) {
-  var json = require( '../package.json'  )
-  console.log(json.version)
-}else{
-  var app = require('../index');
-  app(config);
-}

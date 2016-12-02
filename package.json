@@ -1,8 +1,7 @@
 {
   "name": "browser-proxy",
-  "version": "1.0.23",
-  "description": "A Proxy For Browser",
-  "main": "index.js",
+  "version": "1.0.24",
+  "description": "A Proxy For Developor",
   "bin": {
     "browser-proxy": "./bin/browser-proxy"
   },
@@ -27,14 +26,18 @@
   "preferGlobal": true,
   "homepage": "https://github.com/zobor/browser-proxy",
   "dependencies": {
-    "chokidar": "^1.5.2",
+    "babel-polyfill": "^6.16.0",
+    "chokidar": "^1.6.1",
     "colors": "^1.1.2",
-    "deferred": "^0.7.5",
-    "node.extend": "^1.1.5",
-    "request": "^2.72.0",
-    "socket.io": "^1.4.8"
+    "lodash": "^4.17.2",
+    "mkdirp": "^0.5.1",
+    "node-forge": "^0.6.45",
+    "request": "^2.78.0",
+    "socket.io": "^1.5.1"
   },
   "devDependencies": {
+    "babel-polyfill": "^6.16.0",
+    "esprima": "^3.1.2",
     "babel-core": "^6.16.0",
     "babel-loader": "^6.2.5",
     "babel-preset-es2015": "^6.16.0",

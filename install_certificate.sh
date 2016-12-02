@@ -1,0 +1,1 @@
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain ~/.AppData/z-proxy/z-proxy.ca.crt
