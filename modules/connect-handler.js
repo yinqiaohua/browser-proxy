@@ -104,8 +104,7 @@ var getCertificateByHostname = (hostname, port)=>{
     if (0) {
       requestConfig = {
         method: 'HEAD',
-        // host: 'proxy.tencent.com',
-        host: 'proxyhk.oa.com',
+        // host: 'www.zobor.me',
         port: 8080,
         path: 'https://' + hostname
       }

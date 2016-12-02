@@ -76,7 +76,6 @@ var headers = {
 
 var noProxy = [
   'qq.com',
-  'oa.com',
   'gtimg.cn'
 ];
 

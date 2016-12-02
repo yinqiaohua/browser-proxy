@@ -1,5 +1,4 @@
 module.exports = {
-  pac2: 'http://txp-01.tencent.com/proxy.pac',
   pac: '/Users/zoborzhang/test/proxy.pac',
   rules: [
     {
