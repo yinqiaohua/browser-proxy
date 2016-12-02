@@ -1,6 +1,7 @@
 var Events = require('events')
 var msg = new Events()
-msg.setMaxListeners(500)
+var config = require('../modules/config.js')
+msg.setMaxListeners(1000)
 
 module.exports = (create) => {
 	if (!create) return msg;
@@ -11,14 +12,26 @@ module.exports = (create) => {
 	app.listen(9000);
 
 	function handler(req, res) {
+		console.log(req.url)
 		var filepath;
 		if (req.url === '/') {
 			req.url = '/index.html';
+		}
+		if (req.url === '/install') {
+			req.url = '/install.html';
 		}
 		if (req.url.indexOf('/') === 0) {
 			filepath = req.url;
 		} else {
 			return;
+		}
+		if (req.url === '/cert.crt') {
+			res.writeHead(200, {
+				'Content-Type': 'application/octet-stream'
+			});
+			res.end(fs.readFileSync(config.getDefaultCACertPath()));
+			return;
+
 		}
 
 		fs.readFile(__dirname + '/../ui' + filepath,

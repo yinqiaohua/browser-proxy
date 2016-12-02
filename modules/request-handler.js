@@ -1,16 +1,17 @@
 'use strict';
 var request = require('request')
-var fs = require('fs')
+var fs      = require('fs')
 var pattern = require('./pattern')
-var URL = require('url')
-var UI = require('../modules/ui-app')
-var config = require('../config.js')
-var zlib = require('zlib')
-var dns = require('dns')
+var URL     = require('url')
+var UI      = require('../modules/ui-app')
+var util    = require('../modules/util')
+var config  = require('../config.js')
+var zlib    = require('zlib')
+var dns     = require('dns')
+var colors  = require('colors')
 var Msg
 
 UI(true).on('ui-init', function(socket){
-    console.log('z-proxy.ui-init')
     Msg = socket
 })
 
@@ -47,8 +48,8 @@ var pac, getProxy = ()=>{
 var pacHandler = (data)=>{
   var injectPacFunction = fs.readFileSync('./modules/inject-pac-function.js');
   var exportsCode = [injectPacFunction, 'module.exports=FindProxyForURL'].join('\n\n');
-  // fs.writeFileSync('./cache/proxy.js', data + '\n\n' + exportsCode );
-  // pac = require('../cache/proxy.js');
+  fs.writeFileSync('./cache/proxy.js', data + '\n\n' + exportsCode );
+  pac = require('../cache/proxy.js');
   getProxy = function(hostname){
     var proxyStr = pac('', hostname);
     return 'http://' + proxyStr.replace(/^PROXY\s*/ig,'');
@@ -92,6 +93,7 @@ module.exports = (req, res) => {
     headers: req.headers
   };
   config.url = req.url;
+  if (!req.__sid__) req.__sid__ = util.GUID()
 
   var patterned
   var requestUrlData = URL.parse(req.url, true)
@@ -130,7 +132,6 @@ module.exports = (req, res) => {
     }
   }
   request = request.defaults({'proxy': proxy==='http://DIRECT'?'':proxy});
-  // config.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36';
 
   if ( !(patterned && patterned.host) ) {
     dns.lookup(requestUrlData.hostname, (err, addresses, family)=>{
@@ -139,7 +140,7 @@ module.exports = (req, res) => {
   }
 
   if (req.method==='GET') {
-    // delete config.headers['accept-encoding']
+    delete config.headers['accept-encoding']
     // delte 清除缓存
     delete config.headers['cache-control'];
     delete config.headers['if-modified-since'];

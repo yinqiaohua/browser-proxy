@@ -55,8 +55,8 @@ class Filter extends React.Component {
   render(){
     return (
       <div className="input-group" >
-        <div className="input-group-addon" >filter http request</div>
-        <input onKeyDown={this.handlerKeyDown} onChange={this.handleChange} className="form-control" type="text" placeholder="filter here" value={this.state.keyword} />
+        <div className="input-group-addon" >过滤结果</div>
+        <input onKeyDown={this.handlerKeyDown} onChange={this.handleChange} className="form-control" type="text" placeholder="请输入字符通过URL过滤请求" value={this.state.keyword} />
       </div>
     )
   }

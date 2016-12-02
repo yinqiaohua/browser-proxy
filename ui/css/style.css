@@ -6,6 +6,7 @@ body{
   -webkit-font-smoothing: antialiased;
   font: 100% 'Hiragino Sans GB', Helvetica, Arial, 'Microsoft Yahei';
   font-size: 14px;
+  overflow: hidden;
 }
 .wd-break{
   word-break: break-all;
@@ -28,12 +29,23 @@ body{
 }
 .response-show-div{
   font-size: 14px;
+  overflow: scroll;
 }
 .response-url-title{
   background: #f5f5dc none repeat scroll 0 0;
   padding: 12px;
   word-break: break-all;
   font-size: 14px;
+}
+.scroll-table{
+  overflow: scroll;
+  position: absolute;
+  top: 35px;
+  height: 100%;
+  width: 50%;
+}
+.request-list{
+  width: 100%;
 }
 tr{
   cursor: pointer;
@@ -48,29 +60,24 @@ tr.tr-status-400,tr.tr-status-400 td{
   color: red !important;
 }
 tr.click-selected,tr.click-selected{
-  /*background: #f7debe !important;*/
-  outline: #777 solid 1px;
+  outline: #3CB371 solid 2px;
 }
 .filter-control{
-  padding: 0 20px;
-  background-color: #9ace70;
   position: fixed;
   top: 0;
-  width: 100%;
-  z-index: 3;
-}
-.filter-control input{
-  width: 400px !important;
-}
-.request-list{
-  position: absolute;
-  top: 35px;
-  z-index: 2;
   width: 50%;
+  border-bottom: solid 2px #000;
+}
+.filter-control .form-group .input-group .input-group-addon{
+  width: 80px;
+}
+.filter-control .form-group,
+.filter-control .form-group .input-group{
+  width: 100%!important;
 }
 
 .dataTables_wrapper .DTTT_container .DTTT_button.active {
-  background: #ffde87 !important;
+  border-bottom: 2px solid green;
 }
 
 /*overwrite */
@@ -80,6 +87,9 @@ tr.click-selected,tr.click-selected{
 .panel .panel-body{
   padding-top: 0;
 }
+.dataTables_wrapper .DTTT_container .DTTT_button{
+  padding: 4px;
+}
 
 /* normal style */
 .table > thead > tr > td, .table > tbody > tr > td, .table > tfood > tr > td, .table > thead > tr > th, .table > tbody > tr > th, .table > tfood > tr > th{
@@ -87,4 +97,16 @@ tr.click-selected,tr.click-selected{
 }
 .clear{
   clear: both;
+}
+pre{
+  tab-size: 2;
+}
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Chrome/Safari/Opera */
+     -khtml-user-select: none; /* Konqueror */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  not supported by any browser */
 }

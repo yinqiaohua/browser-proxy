@@ -5,7 +5,6 @@ class ResDetail extends React.Component {
   constructor(props){
     super(props)
 
-    this.closeClickHandler = this.closeClickHandler.bind(this)
     this.tabChangeHandler = this.tabChangeHandler.bind(this)
 
     // state
@@ -29,7 +28,8 @@ class ResDetail extends React.Component {
       var cookies = that.getCookies(data.data.reqHeaders.cookie)
       that.dataset.session.data.cookies = cookies
       that.setState({
-        title: data.data.url,
+        title: decodeURIComponent(data.data.url),
+        url: data.data.url,
         layerDisplay: '',
         method: data.data.method
       })
@@ -55,12 +55,6 @@ class ResDetail extends React.Component {
     //       that.closeClickHandler()
     //     }
     //   }
-    // })
-  }
-
-  closeClickHandler(){
-    // this.setState({
-    //   layerDisplay: 'none'
     // })
   }
 
@@ -111,7 +105,7 @@ class ResDetail extends React.Component {
   }
 
   urlClickHandler(e){
-    window.open(e.target.innerHTML)
+    window.open(e.target.getAttribute('data-url'))
   }
 
   buildRequestHeaders(data, noPre){
@@ -152,19 +146,19 @@ class ResDetail extends React.Component {
     return (
       <div className="panel panel-default detail-layer-pannel" style={{display: this.state.layerDisplay}}>
         <div className="panel-heading">
-          <h3 className="panel-title">Request Detail</h3>
+          <h3 className="panel-title">请求详情</h3>
         </div>
         <div className="panel-body">
-          <h3 className="response-url-title">{this.state.method} <span onClick={this.urlClickHandler}>{this.state.title}</span></h3>
+          <h3 className="response-url-title" data-url={this.state.url} onClick={this.urlClickHandler}>{this.state.method} {this.state.title}</h3>
           <div className="dataTables_wrapper form-inline dt-bootstrap">
             <div className="row" style={{display:'none2'}}>
               <div className="col-sm-12">
                 <div data-role="res-tabs" className="DTTT_container" onClick={this.tabChangeHandler}>
-                  <a data-action="request-headers" className="DTTT_button"><span>Request Headers</span></a>
-                  <a data-action="request-params" className="DTTT_button"><span>Request Params</span></a>
-                  <a data-action="request-cookies" className="DTTT_button"><span>Request Cookies</span></a>
-                  <a data-action="response-headers" className="DTTT_button"><span>Response Headers</span></a>
-                  <a data-action="response-body" className="DTTT_button"><span>Response Content</span></a>
+                  <a data-action="request-headers" className="DTTT_button"><span>请求头</span></a>
+                  <a data-action="request-params" className="DTTT_button"><span>请求参数</span></a>
+                  <a data-action="request-cookies" className="DTTT_button"><span>请求Cookie</span></a>
+                  <a data-action="response-headers" className="DTTT_button"><span>响应头</span></a>
+                  <a data-action="response-body" className="DTTT_button"><span>响应文本</span></a>
                   <a data-action="response-json" className="DTTT_button"><span>JSON</span></a>
                 </div>
               </div>

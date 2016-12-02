@@ -77,7 +77,6 @@ var getServerCertificate = (hostname, port) => {
       localServer.on('request', (req, res)=>{
         req.httpsURL = 'https://' + hostname + req.url
         req.url = 'http://' + hostname + req.url
-        // console.log('localServer.request', req.url);
         req.protocol='https'
         requestHandler(req, res)
       });
@@ -94,9 +93,13 @@ var getServerCertificate = (hostname, port) => {
 var getCertificateByHostname = (hostname, port)=>{
   var hostKey = hostname+':'+port;
   if (cache && cache[hostKey]) {
-    return new Promise((resolve, reject)=>{
-      resolve( cache[hostKey] );
-    })
+    if (cache[hostKey] instanceof Promise) {
+      return cache[hostKey]
+    }else{
+      return new Promise((resolve, reject)=>{
+        resolve( cache[hostKey] );
+      })
+    }
   }
   var promise = new Promise( (resolve, reject)=>{
     var certificate = void 0;
@@ -104,7 +107,7 @@ var getCertificateByHostname = (hostname, port)=>{
     if (0) {
       requestConfig = {
         method: 'HEAD',
-        // host: 'www.zobor.me',
+        // host: 'proxy.company.com',
         port: 8080,
         path: 'https://' + hostname
       }
@@ -148,6 +151,7 @@ var getCertificateByHostname = (hostname, port)=>{
     });
     requestCertificate.end();
   });
+  cache[hostKey] = promise;
   return promise
 }
 

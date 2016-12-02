@@ -25,15 +25,13 @@ server.listen(AppPort, () => {
     })
 
     server.on('request', (req, res) => {
-        var sid = util.GUID();
-        req.__sid__ = sid
+        if (!req.__sid__) req.__sid__ = util.GUID()
         requestHandler(req, res)
     })
 
     // tunneling for https
     server.on('connect', (req, socket, head) => {
-        var sid = util.GUID();
-        req.__sid__ = sid
+        if (!req.__sid__) req.__sid__ = util.GUID()
         connectHandler(req, socket, head)
     })
 

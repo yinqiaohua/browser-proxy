@@ -3243,30 +3243,38 @@
 	// Set.prototype.keys
 	Set.prototype != null && typeof Set.prototype.keys === 'function' && isNative(Set.prototype.keys);
 
+	var setItem;
+	var getItem;
+	var removeItem;
+	var getItemIDs;
+	var addRoot;
+	var removeRoot;
+	var getRootIDs;
+
 	if (canUseCollections) {
 	  var itemMap = new Map();
 	  var rootIDSet = new Set();
 
-	  var setItem = function (id, item) {
+	  setItem = function (id, item) {
 	    itemMap.set(id, item);
 	  };
-	  var getItem = function (id) {
+	  getItem = function (id) {
 	    return itemMap.get(id);
 	  };
-	  var removeItem = function (id) {
+	  removeItem = function (id) {
 	    itemMap['delete'](id);
 	  };
-	  var getItemIDs = function () {
+	  getItemIDs = function () {
 	    return Array.from(itemMap.keys());
 	  };
 
-	  var addRoot = function (id) {
+	  addRoot = function (id) {
 	    rootIDSet.add(id);
 	  };
-	  var removeRoot = function (id) {
+	  removeRoot = function (id) {
 	    rootIDSet['delete'](id);
 	  };
-	  var getRootIDs = function () {
+	  getRootIDs = function () {
 	    return Array.from(rootIDSet.keys());
 	  };
 	} else {
@@ -3282,31 +3290,31 @@
 	    return parseInt(key.substr(1), 10);
 	  };
 
-	  var setItem = function (id, item) {
+	  setItem = function (id, item) {
 	    var key = getKeyFromID(id);
 	    itemByKey[key] = item;
 	  };
-	  var getItem = function (id) {
+	  getItem = function (id) {
 	    var key = getKeyFromID(id);
 	    return itemByKey[key];
 	  };
-	  var removeItem = function (id) {
+	  removeItem = function (id) {
 	    var key = getKeyFromID(id);
 	    delete itemByKey[key];
 	  };
-	  var getItemIDs = function () {
+	  getItemIDs = function () {
 	    return Object.keys(itemByKey).map(getIDFromKey);
 	  };
 
-	  var addRoot = function (id) {
+	  addRoot = function (id) {
 	    var key = getKeyFromID(id);
 	    rootByKey[key] = true;
 	  };
-	  var removeRoot = function (id) {
+	  removeRoot = function (id) {
 	    var key = getKeyFromID(id);
 	    delete rootByKey[key];
 	  };
-	  var getRootIDs = function () {
+	  getRootIDs = function () {
 	    return Object.keys(rootByKey).map(getIDFromKey);
 	  };
 	}
@@ -4087,7 +4095,7 @@
 
 	'use strict';
 
-	module.exports = '15.4.0';
+	module.exports = '15.4.1';
 
 /***/ },
 /* 32 */
@@ -5800,6 +5808,28 @@
 	  return '.' + inst._rootNodeID;
 	};
 
+	function isInteractive(tag) {
+	  return tag === 'button' || tag === 'input' || tag === 'select' || tag === 'textarea';
+	}
+
+	function shouldPreventMouseEvent(name, type, props) {
+	  switch (name) {
+	    case 'onClick':
+	    case 'onClickCapture':
+	    case 'onDoubleClick':
+	    case 'onDoubleClickCapture':
+	    case 'onMouseDown':
+	    case 'onMouseDownCapture':
+	    case 'onMouseMove':
+	    case 'onMouseMoveCapture':
+	    case 'onMouseUp':
+	    case 'onMouseUpCapture':
+	      return !!(props.disabled && isInteractive(type));
+	    default:
+	      return false;
+	  }
+	}
+
 	/**
 	 * This is a unified interface for event plugins to be installed and configured.
 	 *
@@ -5868,7 +5898,12 @@
 	   * @return {?function} The stored callback.
 	   */
 	  getListener: function (inst, registrationName) {
+	    // TODO: shouldPreventMouseEvent is DOM-specific and definitely should not
+	    // live here; needs to be moved to a better place soon
 	    var bankForRegistrationName = listenerBank[registrationName];
+	    if (shouldPreventMouseEvent(registrationName, inst._currentElement.type, inst._currentElement.props)) {
+	      return null;
+	    }
 	    var key = getDictionaryKey(inst);
 	    return bankForRegistrationName && bankForRegistrationName[key];
 	  },
@@ -19958,18 +19993,6 @@
 	  return tag === 'button' || tag === 'input' || tag === 'select' || tag === 'textarea';
 	}
 
-	function shouldPreventMouseEvent(inst) {
-	  if (inst) {
-	    var disabled = inst._currentElement && inst._currentElement.props.disabled;
-
-	    if (disabled) {
-	      return isInteractive(inst._tag);
-	    }
-	  }
-
-	  return false;
-	}
-
 	var SimpleEventPlugin = {
 
 	  eventTypes: eventTypes,
@@ -20040,10 +20063,7 @@
 	      case 'topMouseDown':
 	      case 'topMouseMove':
 	      case 'topMouseUp':
-	        // Disabled elements should not respond to mouse events
-	        if (shouldPreventMouseEvent(targetInst)) {
-	          return null;
-	        }
+	      // TODO: Disabled elements should not respond to mouse events
 	      /* falls through */
 	      case 'topMouseOut':
 	      case 'topMouseOver':
@@ -21405,7 +21425,7 @@
 
 	'use strict';
 
-	module.exports = '15.4.0';
+	module.exports = '15.4.1';
 
 /***/ },
 /* 174 */
@@ -21942,9 +21962,9 @@
 	        _react2.default.createElement(
 	          'div',
 	          { className: 'input-group-addon' },
-	          'filter http request'
+	          '\u8FC7\u6EE4\u7ED3\u679C'
 	        ),
-	        _react2.default.createElement('input', { onKeyDown: this.handlerKeyDown, onChange: this.handleChange, className: 'form-control', type: 'text', placeholder: 'filter here', value: this.state.keyword })
+	        _react2.default.createElement('input', { onKeyDown: this.handlerKeyDown, onChange: this.handleChange, className: 'form-control', type: 'text', placeholder: '\u8BF7\u8F93\u5165\u5B57\u7B26\u901A\u8FC7URL\u8FC7\u6EE4\u8BF7\u6C42', value: this.state.keyword })
 	      );
 	    }
 	  }]);
@@ -22045,6 +22065,9 @@
 	        if (!(data && data.sid)) return;
 	        if (that.dataset.session[data.sid] && data) {
 	          Object.assign(that.dataset.session[data.sid], data);
+	        }
+	        if (!that.dataset.session[data.sid]) {
+	          that.dataset.session[data.sid] = {};
 	        }
 	        if (data.resHeaders && data.resHeaders["content-length"]) {
 	          that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"]);
@@ -22157,60 +22180,64 @@
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
-	        'table',
-	        { className: 'table table-small-font table-bordered table-striped request-list' },
+	        'div',
+	        { className: 'scroll-table noselect' },
 	        _react2.default.createElement(
-	          'thead',
-	          null,
+	          'table',
+	          { className: 'table table-small-font table-bordered table-striped request-list' },
 	          _react2.default.createElement(
-	            'tr',
+	            'thead',
 	            null,
 	            _react2.default.createElement(
-	              'th',
+	              'tr',
 	              null,
-	              '#'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              'Result'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              'Protocol'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              'Host'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              'ServerIp'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              'TimeSpend'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              'FileSize'
-	            ),
-	            _react2.default.createElement(
-	              'th',
-	              null,
-	              'URL'
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '#'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '\u7ED3\u679C'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '\u534F\u8BAE'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '\u57DF\u540D'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '\u670D\u52A1\u5668IP'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '\u8017\u65F6'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '\u5927\u5C0F'
+	              ),
+	              _react2.default.createElement(
+	                'th',
+	                null,
+	                '\u8DEF\u5F84'
+	              )
 	            )
+	          ),
+	          _react2.default.createElement(
+	            'tbody',
+	            null,
+	            this.state.rows || []
 	          )
-	        ),
-	        _react2.default.createElement(
-	          'tbody',
-	          null,
-	          this.state.rows || []
 	        )
 	      );
 	    }
@@ -22257,7 +22284,6 @@
 
 	    var _this = _possibleConstructorReturn(this, (ResDetail.__proto__ || Object.getPrototypeOf(ResDetail)).call(this, props));
 
-	    _this.closeClickHandler = _this.closeClickHandler.bind(_this);
 	    _this.tabChangeHandler = _this.tabChangeHandler.bind(_this);
 
 	    // state
@@ -22284,7 +22310,8 @@
 	        var cookies = that.getCookies(data.data.reqHeaders.cookie);
 	        that.dataset.session.data.cookies = cookies;
 	        that.setState({
-	          title: data.data.url,
+	          title: decodeURIComponent(data.data.url),
+	          url: data.data.url,
 	          layerDisplay: '',
 	          method: data.data.method
 	        });
@@ -22310,13 +22337,6 @@
 	      //       that.closeClickHandler()
 	      //     }
 	      //   }
-	      // })
-	    }
-	  }, {
-	    key: 'closeClickHandler',
-	    value: function closeClickHandler() {
-	      // this.setState({
-	      //   layerDisplay: 'none'
 	      // })
 	    }
 	  }, {
@@ -22370,7 +22390,7 @@
 	  }, {
 	    key: 'urlClickHandler',
 	    value: function urlClickHandler(e) {
-	      window.open(e.target.innerHTML);
+	      window.open(e.target.getAttribute('data-url'));
 	    }
 	  }, {
 	    key: 'buildRequestHeaders',
@@ -22443,7 +22463,7 @@
 	          _react2.default.createElement(
 	            'h3',
 	            { className: 'panel-title' },
-	            'Request Detail'
+	            '\u8BF7\u6C42\u8BE6\u60C5'
 	          )
 	        ),
 	        _react2.default.createElement(
@@ -22451,14 +22471,10 @@
 	          { className: 'panel-body' },
 	          _react2.default.createElement(
 	            'h3',
-	            { className: 'response-url-title' },
+	            { className: 'response-url-title', 'data-url': this.state.url, onClick: this.urlClickHandler },
 	            this.state.method,
 	            ' ',
-	            _react2.default.createElement(
-	              'span',
-	              { onClick: this.urlClickHandler },
-	              this.state.title
-	            )
+	            this.state.title
 	          ),
 	          _react2.default.createElement(
 	            'div',
@@ -22478,7 +22494,7 @@
 	                    _react2.default.createElement(
 	                      'span',
 	                      null,
-	                      'Request Headers'
+	                      '\u8BF7\u6C42\u5934'
 	                    )
 	                  ),
 	                  _react2.default.createElement(
@@ -22487,7 +22503,7 @@
 	                    _react2.default.createElement(
 	                      'span',
 	                      null,
-	                      'Request Params'
+	                      '\u8BF7\u6C42\u53C2\u6570'
 	                    )
 	                  ),
 	                  _react2.default.createElement(
@@ -22496,7 +22512,7 @@
 	                    _react2.default.createElement(
 	                      'span',
 	                      null,
-	                      'Request Cookies'
+	                      '\u8BF7\u6C42Cookie'
 	                    )
 	                  ),
 	                  _react2.default.createElement(
@@ -22505,7 +22521,7 @@
 	                    _react2.default.createElement(
 	                      'span',
 	                      null,
-	                      'Response Headers'
+	                      '\u54CD\u5E94\u5934'
 	                    )
 	                  ),
 	                  _react2.default.createElement(
@@ -22514,7 +22530,7 @@
 	                    _react2.default.createElement(
 	                      'span',
 	                      null,
-	                      'Response Content'
+	                      '\u54CD\u5E94\u6587\u672C'
 	                    )
 	                  ),
 	                  _react2.default.createElement(

@@ -61,6 +61,9 @@ class Table extends React.Component {
       if ( that.dataset.session[data.sid] && data) {
         Object.assign(that.dataset.session[data.sid], data)
       }
+      if (!that.dataset.session[data.sid]){
+        that.dataset.session[data.sid] = {}
+      }
       if (data.resHeaders && data.resHeaders["content-length"]) {
         that.dataset.session[data.sid]['filesize'] = that.formatFileSize(data.resHeaders["content-length"])
       }
@@ -139,21 +142,23 @@ class Table extends React.Component {
 
   render() {
     return (
-      <table className="table table-small-font table-bordered table-striped request-list">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Result</th>
-            <th>Protocol</th>
-            <th>Host</th>
-            <th>ServerIp</th>
-            <th>TimeSpend</th>
-            <th>FileSize</th>
-            <th>URL</th>
-          </tr>
-        </thead>
-        <tbody>{this.state.rows||[]}</tbody>
-      </table>
+      <div className="scroll-table noselect">
+        <table className="table table-small-font table-bordered table-striped request-list">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>结果</th>
+              <th>协议</th>
+              <th>域名</th>
+              <th>服务器IP</th>
+              <th>耗时</th>
+              <th>大小</th>
+              <th>路径</th>
+            </tr>
+          </thead>
+          <tbody>{this.state.rows||[]}</tbody>
+        </table>
+      </div>
     )
   }
 }

@@ -24,20 +24,6 @@ watcher.on('change', function(path) {
   console.log( colors.yellow('watcher ready:') + colors.green.underline(configFile) );
 });
 
-// var broadcast = (options)=>{
-//   if ( !(Msg && Msg.emit) ) return;
-//   Msg.emit('response', {
-//     sid: options.sid,
-//     body: options.body || '',
-//     mapLocal: options.mapLocal,
-//     useHOST: options.useHOST ,
-//     reqEndTime: (+new Date),
-//     postBody: options.postBody,
-//     statusCode: options.statusCode,
-//     resHeaders: options.resHeaders
-//   });
-// }
-
 module.exports = rulePattern = (req, res)=>{
   var options = {};
   // match request url

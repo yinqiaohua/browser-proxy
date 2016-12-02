@@ -3,9 +3,9 @@
 var path = require('path');
 
 var config              = exports;
-config.caCertFileName   = 'z-proxy.ca.crt';
-config.caKeyFileName    = 'z-proxy.ca.key.pem';
-config.caName           = 'z-proxy-cert';
+config.caCertFileName   = 'browser-proxy.ca.crt';
+config.caKeyFileName    = 'browser-proxy.ca.key.pem';
+config.caName           = 'browser-proxy-cert';
 config.organizationName = 'zoborzhang';
 config.OU               = 'http://zobor.me';
 config.countryName      = 'CN';
@@ -14,13 +14,13 @@ config.localityName     = 'ShenZhen';
 
 config.getDefaultCABasePath = () => {
   var userHome = process.env.HOME || process.env.USERPROFILE;
-  return path.resolve(userHome, './.AppData/z-proxy');
+  return path.resolve(userHome, './.AppData/browser-proxy');
 };
 
 config.getDefaultCACertPath = () => {
   return path.resolve(config.getDefaultCABasePath(), config.caCertFileName);
 };
 
-config.getDefaultCACertPath = () => {
+config.getDefaultCAKeyPath = () => {
   return path.resolve(config.getDefaultCABasePath(), config.caKeyFileName);
 };
