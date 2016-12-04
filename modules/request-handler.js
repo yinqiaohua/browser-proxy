@@ -5,11 +5,19 @@ var pattern = require('./pattern')
 var URL     = require('url')
 var UI      = require('../modules/ui-app')
 var util    = require('../modules/util')
-var config  = require('../config.js')
 var zlib    = require('zlib')
 var dns     = require('dns')
 var colors  = require('colors')
+var qs = require('qs')
 var Msg
+var configHandler = require('./config')
+var config = configHandler.config
+configHandler.msg.on('config-file-change', function(conf){
+  config = conf
+})
+
+
+
 
 UI(true).on('ui-init', function(socket){
     Msg = socket
@@ -89,10 +97,10 @@ var showResponseText = (headers)=>{
 
 
 module.exports = (req, res) => {
-  var config = {
+  var requestConfig = {
     headers: req.headers
   };
-  config.url = req.url;
+  requestConfig.url = req.url;
   if (!req.__sid__) req.__sid__ = util.GUID()
 
   var patterned
@@ -102,13 +110,26 @@ module.exports = (req, res) => {
   var chunks = []
   var serverIP;
 
-  broadcast({
-    url: req.httpsURL||req.url,
-    sid: req.__sid__,
-    query: requestUrlData.query,
-    method: req.method,
-    reqheaders: req.headers
-  })
+  if (config.disable_cache) {
+    // delte 清除缓存
+    delete requestConfig.headers['cache-control'];
+    delete requestConfig.headers['if-modified-since'];
+    delete requestConfig.headers['if-none-match'];
+  }
+  if (config.disable_gzip) {
+    // 禁止gzip
+    delete requestConfig.headers['accept-encoding']
+  }
+
+  if (req.method==='GET') {
+    broadcast({
+      url: req.httpsURL||req.url,
+      sid: req.__sid__,
+      query: requestUrlData.query,
+      method: req.method,
+      reqheaders: requestConfig.headers
+    })
+  }
 
   // 匹配了不要再请求
   patterned = pattern(req, res) || {}
@@ -118,10 +139,10 @@ module.exports = (req, res) => {
     return;
   }
   if (patterned && patterned.host) {
-    config.hostname = patterned.host;
+    requestConfig.hostname = patterned.host;
   }
   else if (patterned && patterned.remoteUrl) {
-    config.url = patterned.remoteUrl;
+    requestConfig.url = patterned.remoteUrl;
   }
 
   if ( !(patterned && patterned.host) ) {
@@ -140,51 +161,8 @@ module.exports = (req, res) => {
   }
 
   if (req.method==='GET') {
-    delete config.headers['accept-encoding']
-    // delte 清除缓存
-    delete config.headers['cache-control'];
-    delete config.headers['if-modified-since'];
-    delete config.headers['if-none-match'];
-    request.get(config, (err,response, body)=>{
-      var resBody
-      if (err || !(response && response.headers) ) return
-      resBody = '';
-      if ( showResponseText(response.headers) ) {
-        // 解压zip
-        if (response.headers['content-encoding']==='gzip') {
-          var buffer = Buffer.concat(chunks)
-          zlib.gunzip(buffer, (err, decoded)=>{
-            if (err) {
-              return
-            }
-            resBody = decoded.toString()
-            // zip response broadcast
-            broadcastResponse({
-              sid: req.__sid__,
-              body: resBody,
-              useHOST: !!patterned.host,
-              reqEndTime: (+new Date),
-              statusCode: response.statusCode,
-              resHeaders: response.headers,
-              hostname: serverIP || patterned.host || '127.0.0.1'
-            })
-          });
-          return;
-        }else{
-          resBody = body;
-        }
-      }else{
-        resBody = ''
-      }
-      broadcastResponse({
-        sid: req.__sid__,
-        body: resBody,
-        useHOST: !!patterned.host,
-        reqEndTime: (+new Date),
-        statusCode: response.statusCode,
-        resHeaders: response.headers,
-        hostname: serverIP || patterned.host || '127.0.0.1'
-      })
+    request.get(requestConfig, (err,response, body)=>{
+      showResponseData(err,response, body, patterned, req, serverIP, chunks)
     })
     .on('data', (chunk)=>{
       chunks.push(chunk)
@@ -192,15 +170,65 @@ module.exports = (req, res) => {
     .pipe(res)
   }
   else if(req.method==='POST'){
-    request.post(config, (err,response, body)=>{}).pipe(res);
-    // req.on('data', function (chunk) {
-    //   postBody.push(chunk);
-    // });
-    // req.on('end', function () {
-    //   config.form = postBody.join('');
-    //   request.post(config, function(err,response, body){
-    //     // emitData(response, body, requestConfig.form);
-    //   }).pipe(res)
-    // });
+    req.on('data', (chunk)=>{
+      postBody.push(chunk);
+    });
+    req.on('end', () =>{
+      requestConfig.form = postBody.join('')
+      broadcast({
+        url: req.httpsURL||req.url,
+        sid: req.__sid__,
+        query: qs.parse(requestConfig.form),
+        method: req.method,
+        reqheaders: req.headers
+      })
+      request.post(requestConfig,(err,response, body)=>{
+        showResponseData(err,response, body, patterned, req, serverIP, chunks)
+      })
+      .on('data', (chunk)=>{
+        chunks.push(chunk)
+      })
+      .pipe(res)
+    });
   }
+}
+
+var showResponseData=(err,response, body, patterned, req, serverIP, chunks)=>{
+  var resBody
+  if (err || !(response && response.headers) ) return
+  resBody = '';
+  if ( showResponseText(response.headers) ) {
+    // 解压zip
+    if (response.headers['content-encoding']==='gzip') {
+      var buffer = Buffer.concat(chunks)
+      zlib.gunzip(buffer, (err, decoded)=>{
+        if (err) {
+          return
+        }
+        resBody = decoded.toString()
+        // zip response broadcast
+        broadcastResponse({
+          sid: req.__sid__,
+          body: resBody,
+          useHOST: !!patterned.host,
+          statusCode: response.statusCode,
+          resHeaders: response.headers,
+          hostname: serverIP || patterned.host || '127.0.0.1'
+        })
+      });
+      return;
+    }else{
+      resBody = body;
+    }
+  }else{
+    resBody = ''
+  }
+  broadcastResponse({
+    sid: req.__sid__,
+    body: resBody,
+    useHOST: !!patterned.host,
+    statusCode: response.statusCode,
+    resHeaders: response.headers,
+    hostname: serverIP || patterned.host || '127.0.0.1'
+  })
 }

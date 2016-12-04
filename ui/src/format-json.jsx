@@ -2,7 +2,7 @@ var js_code = {};
 js_code.css = function(){
 /*
 ul li{
-  margin-left: 17px;
+  margin-left: 12px;
 }
 ul.hover{
   background: #dfdfdf;

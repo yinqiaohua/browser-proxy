@@ -1,6 +1,6 @@
 var Events = require('events')
 var msg = new Events()
-var config = require('../modules/config.js')
+var config = require('../modules/ca-config.js')
 msg.setMaxListeners(1000)
 
 module.exports = (create) => {
@@ -12,7 +12,6 @@ module.exports = (create) => {
 	app.listen(9000);
 
 	function handler(req, res) {
-		console.log(req.url)
 		var filepath;
 		if (req.url === '/') {
 			req.url = '/index.html';

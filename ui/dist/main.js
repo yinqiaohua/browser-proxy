@@ -22463,7 +22463,7 @@
 	          _react2.default.createElement(
 	            'h3',
 	            { className: 'panel-title' },
-	            '\u8BF7\u6C42\u8BE6\u60C5'
+	            '\u8BF7\u6C42\u660E\u7EC6'
 	          )
 	        ),
 	        _react2.default.createElement(
@@ -22577,7 +22577,7 @@
 	js_code.css = function () {
 	  /*
 	  ul li{
-	    margin-left: 17px;
+	    margin-left: 12px;
 	  }
 	  ul.hover{
 	    background: #dfdfdf;

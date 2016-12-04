@@ -1,28 +1,13 @@
-var path = require('path')
-var configFile = path.resolve('./config.js');
-var config = require(configFile)
 var fs = require('fs')
 var util = require('./util')
-var chokidar = require('chokidar')
 var colors = require('colors')
-
-
-var watcher = chokidar.watch(configFile, {
-  ignored: /[\/\\]\./,
-  persistent: true
-});
-watcher.on('change', function(path) {
-  console.log([
-    colors.gray('['+new Date().toLocaleTimeString().replace(/上午|下午/,'')+']'),
-    colors.yellow('pattern config changed:'),
-    colors.green.underline(configFile)
-  ].join(''))
-  delete require.cache[require.resolve(configFile)]
-  config = require(configFile);
+var configHandler = require('./config')
+var config = configHandler.config
+configHandler.msg.on('config-file-change', function(conf){
+  config = conf
 })
-.on('ready', function() {
-  console.log( colors.yellow('watcher ready:') + colors.green.underline(configFile) );
-});
+
+
 
 module.exports = rulePattern = (req, res)=>{
   var options = {};

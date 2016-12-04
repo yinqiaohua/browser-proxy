@@ -8,9 +8,6 @@ body{
   font-size: 14px;
   overflow: hidden;
 }
-.wd-break{
-  word-break: break-all;
-}
 .detail-layer-pannel{
   position: fixed;
   width: 50%;
@@ -20,22 +17,23 @@ body{
   top: 0;
   right: 0;
 }
-.table-condensed caption{
-  font-size: 30px;
-}
 .response-body{
   width: 100%;
   float: left;
 }
 .response-show-div{
-  font-size: 14px;
+  font-size: 13px;
   overflow: scroll;
 }
 .response-url-title{
-  background: #f5f5dc none repeat scroll 0 0;
-  padding: 12px;
   word-break: break-all;
   font-size: 14px;
+  text-decoration: underline;
+  font-style: italic;
+  cursor: pointer;
+}
+.response-url-title:hover{
+  color: #000;
 }
 .scroll-table{
   overflow: scroll;
@@ -47,20 +45,39 @@ body{
 .request-list{
   width: 100%;
 }
-tr{
+.response-show-div table{
+  border: solid 1px #EFEFEF;
+}
+.response-show-div table tbody tr td:nth-child(1){
+  min-width: 135px;
+  text-align: right;
+  border-right: 1px solid #efefef;
+  font-weight: bold;
+}
+.response-show-div table thead th{
+  border: none;
+  border-right: 1px solid #efefef;
+}
+.response-show-div pre{
+  background-color: #fbfbfb;
+}
+.request-list tr{
   cursor: pointer;
 }
-tr.tr-host-selected,tr.tr-host-selected td{
-  background-color: #bff5f7 !important;
+.request-list tbody tr.tr-host-selected,.request-list tbody tr.tr-host-selected td{
+  background-color: #bff5f7;
 }
-tr.tr-maplocal-selected,tr.tr-maplocal-selected td{
-  background-color: #f3d0b8 !important;
+.request-list tbody tr.tr-maplocal-selected,.request-list tbody tr.tr-maplocal-selected td{
+  background-color: #f3d0b8;
 }
-tr.tr-status-400,tr.tr-status-400 td{
+.request-list tbody tr.tr-status-400,.request-list tbody tr.tr-status-400 td{
   color: red !important;
 }
-tr.click-selected,tr.click-selected{
-  outline: #3CB371 solid 2px;
+.request-list tbody tr.click-selected,.request-list tbody tr.click-selected td{
+  /*outline: #3CB371 dashed 2px;*/
+  background-color: #84bed4;
+  color: #fff;
+  border-color: #84bed4;
 }
 .filter-control{
   position: fixed;
@@ -86,6 +103,11 @@ tr.click-selected,tr.click-selected{
 }
 .panel .panel-body{
   padding-top: 0;
+  color: #333;
+}
+.dataTables_wrapper .DTTT_container{
+  margin-left: 0;
+  float: left;
 }
 .dataTables_wrapper .DTTT_container .DTTT_button{
   padding: 4px;
@@ -109,4 +131,20 @@ pre{
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   not supported by any browser */
+}
+.wd-break{
+  word-break: break-all;
+}
+
+
+/*media auto response*/
+@media (max-width: 1300px) {
+  .scroll-table{width: 50%;}
+  .filter-control{width:50%;}
+  .detail-layer-pannel{width: 50%;}
+}
+@media (min-width: 1300px) {
+  .scroll-table{width: 70%;}
+  .filter-control{width:70%;}
+  .detail-layer-pannel{width: 30%;}
 }

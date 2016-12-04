@@ -146,7 +146,7 @@ class ResDetail extends React.Component {
     return (
       <div className="panel panel-default detail-layer-pannel" style={{display: this.state.layerDisplay}}>
         <div className="panel-heading">
-          <h3 className="panel-title">请求详情</h3>
+          <h3 className="panel-title">请求明细</h3>
         </div>
         <div className="panel-body">
           <h3 className="response-url-title" data-url={this.state.url} onClick={this.urlClickHandler}>{this.state.method} {this.state.title}</h3>
