@@ -85,12 +85,31 @@ body{
   width: 50%;
   border-bottom: solid 2px #000;
 }
-.filter-control .form-group .input-group .input-group-addon{
-  width: 80px;
-}
 .filter-control .form-group,
 .filter-control .form-group .input-group{
   width: 100%!important;
+}
+.filter-group .filter-label{
+  text-align: right;
+}
+.filter-group .filter-label,
+.filter-group input{
+  height: 30px;
+  line-height: 30px;
+}
+.filter-group .glyphicon{
+  font-size: 20px;
+  font-weight: 300;
+  height: 28px;
+  line-height: 30px;
+  cursor: pointer;
+  padding: 0 3px;
+  top: 1px;
+  right: 1px;
+}
+.filter-group .glyphicon:hover{
+  background-color: #000;
+  color: #fff;
 }
 
 .dataTables_wrapper .DTTT_container .DTTT_button.active {
@@ -112,6 +131,7 @@ body{
 .dataTables_wrapper .DTTT_container .DTTT_button{
   padding: 4px;
 }
+
 
 /* normal style */
 .table > thead > tr > td, .table > tbody > tr > td, .table > tfood > tr > td, .table > thead > tr > th, .table > tbody > tr > th, .table > tfood > tr > th{

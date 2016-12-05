@@ -149,7 +149,7 @@ class ResDetail extends React.Component {
           <h3 className="panel-title">请求明细</h3>
         </div>
         <div className="panel-body">
-          <h3 className="response-url-title" data-url={this.state.url} onClick={this.urlClickHandler}>{this.state.method} {this.state.title}</h3>
+          <h3 className="response-url-title" data-url={this.state.url} title="点击可新窗口打开" onClick={this.urlClickHandler}>{this.state.method} {this.state.title}</h3>
           <div className="dataTables_wrapper form-inline dt-bootstrap">
             <div className="row" style={{display:'none2'}}>
               <div className="col-sm-12">

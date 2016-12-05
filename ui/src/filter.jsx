@@ -36,6 +36,10 @@ class Filter extends React.Component {
     this.setState({keyword: e.target.value});
   }
 
+  settingClick(e){
+    window.open('http://127.0.0.1:9000/settings')
+  }
+
   sendMsg(msg){
     this.props.msg.emit('filter', {
       value: msg
@@ -54,9 +58,13 @@ class Filter extends React.Component {
 
   render(){
     return (
-      <div className="input-group" >
-        <div className="input-group-addon" >过滤结果</div>
-        <input onKeyDown={this.handlerKeyDown} onChange={this.handleChange} className="form-control" type="text" placeholder="请输入字符通过URL过滤请求" value={this.state.keyword} />
+      <div className="row filter-group" >
+        <div className="col-md-2 filter-label" >过滤结果</div>
+        <input onKeyDown={this.handlerKeyDown} onChange={this.handleChange} className="form-controla filter-input col-md-8" type="text" placeholder="请输入字符通过URL过滤请求" value={this.state.keyword} />
+        <div className="col-md-2">
+          <span className="glyphicon glyphicon-asterisk btn-secondary" onClick={this.settingClick} data-toggle="tooltip" data-placement="bottom" title="设置"></span>
+          <span className="glyphicon glyphicon-signal" data-toggle="tooltip" data-placement="bottom" title="弱网模拟"></span>
+        </div>
       </div>
     )
   }

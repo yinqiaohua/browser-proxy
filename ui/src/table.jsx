@@ -89,7 +89,6 @@ class Table extends React.Component {
       }
       $sid.find('td.data-filesize').html( that.dataset.session[data.sid].filesize )
     })
-
     this.props.msg.on('filter', data=>{
       that.dataset.keyword = data.value;
       var list = [];
@@ -106,18 +105,55 @@ class Table extends React.Component {
       }
       that.setState({rows: list})
     })
+    this.keybordSekect()
+  }
+
+  keybordSekect(){
+    var that = this
+    $(document).on('keydown', e=>{
+      if (!e.shiftKey) {
+        if (e.keyCode===38) {
+          that.selectUp()
+          e.preventDefault()
+        }
+        if (e.keyCode===40) {
+          that.selectDown()
+          e.preventDefault()
+        }
+      }
+    })
+  }
+
+  selectUp(){
+    var $select = $('.click-selected')
+    var $prev = $select.prev();
+    if ($prev) {
+      $prev.addClass('click-selected').siblings().removeClass('click-selected')
+      setTimeout(()=>{
+        $prev.click()
+      })
+    }
+  }
+
+  selectDown(){
+    var $select = $('.click-selected')
+    var $next = $select.next();
+    if ($next) {
+      $next.addClass('click-selected').siblings().removeClass('click-selected')
+      setTimeout(()=>{
+        $next.click()
+      })
+    }
   }
 
   clickHandler(e){
-    var $tr = e.target;
+    var $tr = e.target
     if ($tr.nodeName.toLowerCase()==='td') {
       $tr = $( $tr ).parents('tr')
     }else{
       $tr = $( $tr )
     }
     var id = $tr.attr('data-id')
-    // if ($tr.hasClass('click-selected')){
-    // }
     $tr.addClass('click-selected').siblings().removeClass('click-selected')
     this.props.msg.emit('tableClick', {
       id: id,

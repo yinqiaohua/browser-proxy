@@ -19,6 +19,9 @@ module.exports = (create) => {
 		if (req.url === '/install') {
 			req.url = '/install.html';
 		}
+		if (req.url === '/settings') {
+			req.url = '/settings.html';
+		}
 		if (req.url.indexOf('/') === 0) {
 			filepath = req.url;
 		} else {
