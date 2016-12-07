@@ -45,7 +45,8 @@ var broadcastResponse = (options)=>{
     postBody: options.postBody,
     statusCode: options.statusCode,
     resHeaders: options.resHeaders,
-    hostname: options.hostname||''
+    hostname: options.hostname||'',
+    serverip: options.serverip||''
   });
 }
 
@@ -134,7 +135,7 @@ module.exports = (req, res) => {
   // 匹配了不要再请求
   patterned = pattern(req, res) || {}
   if ( patterned.sendRequest===false ) {
-    patterned.hostname = '127.0.0.1';
+    patterned.serverip = '127.0.0.1';
     broadcastResponse(patterned)
     return;
   }
@@ -213,7 +214,7 @@ var showResponseData=(err,response, body, patterned, req, serverIP, chunks)=>{
           useHOST: !!patterned.host,
           statusCode: response.statusCode,
           resHeaders: response.headers,
-          hostname: serverIP || patterned.host || '127.0.0.1'
+          serverip: serverIP || patterned.host || '127.0.0.1'
         })
       });
       return;
@@ -229,6 +230,6 @@ var showResponseData=(err,response, body, patterned, req, serverIP, chunks)=>{
     useHOST: !!patterned.host,
     statusCode: response.statusCode,
     resHeaders: response.headers,
-    hostname: serverIP || patterned.host || '127.0.0.1'
+    serverip: serverIP || patterned.host || '127.0.0.1'
   })
 }

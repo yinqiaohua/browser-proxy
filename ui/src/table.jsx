@@ -47,7 +47,9 @@ class Table extends React.Component {
       that.dataset.session[data.sid] = data
       if (
         that.dataset.keyword &&
-        that.dataset.session[data.sid].url.indexOf(that.dataset.keyword)===-1){
+        that.dataset.session[data.sid] &&
+        that.dataset.session[data.sid].url &&
+        that.dataset.session[data.sid].url.toLowerCase().indexOf(that.dataset.keyword.toLowerCase())===-1){
         return;
       }
       var rows = that.state.rows
@@ -58,6 +60,7 @@ class Table extends React.Component {
     })
     this.props.msg.on('requestDone', data=>{
       if ( !(data && data.sid) ) return;
+      if (data && !data.hostname) delete data.hostname
       if ( that.dataset.session[data.sid] && data) {
         Object.assign(that.dataset.session[data.sid], data)
       }
@@ -71,11 +74,13 @@ class Table extends React.Component {
 
       if (
         that.dataset.keyword &&
-        that.dataset.session[data.sid].url.indexOf(that.dataset.keyword)===-1){
+        that.dataset.session[data.sid] &&
+        that.dataset.session[data.sid].url &&
+        that.dataset.session[data.sid].url.toLowerCase().indexOf(that.dataset.keyword.toLowerCase())===-1){
         return;
       }
       var $sid = $('tr[data-id="' + data.sid + '"]')
-      $sid.find('td.data-serverip').html( data.hostname )
+      $sid.find('td.data-serverip').html( data.serverip )
       $sid.find('td.data-status').html( data.statusCode )
       $sid.find('td.data-timespend').html( that.dataset.session[data.sid].timespend )
       if (data.useHOST) {
@@ -94,7 +99,7 @@ class Table extends React.Component {
       var list = [];
       if (that.dataset.keyword) {
         $.each(that.dataset.session, (idx, item)=>{
-          if (item && item.url && item.url.indexOf(that.dataset.keyword)>-1) {
+          if (item && item.url && item.url.toLowerCase().indexOf(that.dataset.keyword.toLowerCase())>-1) {
             list.push( that.updateRows(item) )
           }
         })

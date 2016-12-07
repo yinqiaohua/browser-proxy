@@ -4,6 +4,7 @@ var http           = require('http')
 var colors         = require('colors')
 var requestHandler = require('../modules/request-handler.js')
 var connectHandler = require('../modules/connect-handler.js')
+// var upgradeHandler = require('../modules/upgrade-handler.js')
 var program        = require('commander')
 var packageJson    = require('../package.json')
 var server         = new http.Server()
@@ -25,6 +26,7 @@ server.listen(AppPort, () => {
     })
 
     server.on('request', (req, res) => {
+        // console.log(req.url)
         if (!req.__sid__) req.__sid__ = util.GUID()
         requestHandler(req, res)
     })

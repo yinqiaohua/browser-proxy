@@ -1,6 +1,6 @@
 {
   "name": "browser-proxy",
-  "version": "1.0.24",
+  "version": "2.0.0",
   "description": "A Proxy For Developor",
   "bin": {
     "browser-proxy": "./bin/browser-proxy"
@@ -36,7 +36,6 @@
     "socket.io": "^1.5.1"
   },
   "devDependencies": {
-    "babel-polyfill": "^6.16.0",
     "esprima": "^3.1.2",
     "babel-core": "^6.16.0",
     "babel-loader": "^6.2.5",

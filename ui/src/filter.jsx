@@ -26,10 +26,16 @@ class Filter extends React.Component {
   }
 
   handlerKeyDown(e) {
-    if (e.keyCode === 13) {
-      this.sendMsg(e.target.value)
-      this.saveMsg(e.target.value)
+    var that = this
+    var keyword = e.target.value
+    if (that.filterTimer) {
+      clearTimeout( that.filterTimer )
+      that.filterTimer = null
     }
+    that.filterTimer = setTimeout(()=>{
+      that.sendMsg(keyword)
+      that.saveMsg(keyword)
+    },300)
   }
 
   handleChange(e){
