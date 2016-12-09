@@ -1,4 +1,5 @@
 var fs = require('fs')
+var path = require('path')
 var util = require('./util')
 var colors = require('colors')
 var configHandler = require('./config')
@@ -31,7 +32,14 @@ module.exports = rulePattern = (req, res)=>{
 
   // localFile
   if (options.responder.localFile) {
-    options.responseBody = fs.readFileSync(options.responder.localFile, 'utf-8')
+    if (options.responder.localFile.indexOf('/')!==0) {
+      options.responder.localFile = path.resolve(__dirname, '../'+options.responder.localFile)
+    }
+    if (fs.existsSync(options.responder.localFile)) {
+      options.responseBody = fs.readFileSync(options.responder.localFile, 'utf-8')
+    }else{
+      options.responder.httpStatus = '404'
+    }
   }
   // local path
   else if(options.responder.filename &&
@@ -39,7 +47,11 @@ module.exports = rulePattern = (req, res)=>{
     options.responder.localPath
   ){
     options.responder.filepath = options.responder.localPath + options.responder.filename[1];
-    options.responseBody = fs.readFileSync(options.responder.filepath, 'utf-8')
+    if (fs.existsSync(options.responder.filepath)) {
+      options.responseBody = fs.readFileSync(options.responder.filepath, 'utf-8')
+    }else{
+      options.responder.httpStatus = '404'
+    }
   }
   // combo
   else if( options.responder.filename &&
@@ -67,10 +79,15 @@ module.exports = rulePattern = (req, res)=>{
     })
     options.responseBody = []
     options.responder.matchFiles.forEach((filepath, idx)=>{
-      options.responseBody.push( fs.readFileSync(filepath,'utf-8') )
+      if (fs.existsSync(filepath)) {
+        options.responseBody.push( fs.readFileSync(filepath,'utf-8') )
+      }else{
+        options.responder.httpStatus = '404'
+        options.responseBody=[]
+        console.log( colors.red('[404] ' + filepath) )
+      }
     })
     options.responseBody = options.responseBody.join('')
-    // options.responseHeaders = options.responder.responseHeaders
   }
   // Interceptor
   else if(typeof options.responder.requestInterceptor==='function'){

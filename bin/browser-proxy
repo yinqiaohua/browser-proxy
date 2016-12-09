@@ -4,13 +4,12 @@ var http           = require('http')
 var colors         = require('colors')
 var requestHandler = require('../modules/request-handler.js')
 var connectHandler = require('../modules/connect-handler.js')
-// var upgradeHandler = require('../modules/upgrade-handler.js')
 var program        = require('commander')
 var packageJson    = require('../package.json')
 var server         = new http.Server()
 var AppPort        = 8787
-var URL = require('url')
-var util = require('../modules/util')
+var URL            = require('url')
+var util           = require('../modules/util')
 
 program.version(packageJson.version)
     .option('-c, --config [value]', 'config file path')
@@ -20,7 +19,7 @@ program.version(packageJson.version)
 AppPort = program.port || AppPort
 
 server.listen(AppPort, () => {
-    console.log(colors.green('z-proxy已启动，端口: ' + AppPort))
+    console.log( colors.yellow('browser-proxy启动成功 端口: ') + colors.green(AppPort))
     server.on('error', (e) => {
         console.error(colors.red(e))
     })

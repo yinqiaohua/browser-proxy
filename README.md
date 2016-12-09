@@ -1,8 +1,8 @@
 # browser-proxy
 
 ## UI界面
-![Alt text](./images/pannel.png "UI界面")
-![Alt text](./images/resp.png "响应界面")
+![Alt text](./images/pannel.png 'UI界面')
+![Alt text](./images/resp.png '响应界面')
 
 ## 前端调试的代理调试工具
 * 代理到本地文件
@@ -14,95 +14,108 @@
 * 添加response headers
 
 
-## 安装与启动
+## install and start app
 ```
-npm install browser-proxy -g
+sudo npm install browser-proxy -g
 
-// start browser proxy with default
+// start browser proxy with default port
 browser-proxy
 
 // set port & start browser-proxy
 browser-proxy -p 8888
 
-// set a config file
-browser-proxy -c /path/to/local/file/browser-proxy.config.js
+// use local config
+mkdir -p /Users/zoborzhang/config/
+cd /Users/zoborzhang/config/
+touch config.js
+edit config.js with follow code:
+
+  module.exports = {
+    rules: [
+      // map to localfile
+      {
+        regx: '^https?://v.qq.com/welcome.html',
+        localFile: './welcome.html',
+      }
+    ],
+    disable_cache: true,
+    disable_gzip: true
+  }
+now start: browser-proxy
 ```
+
 ## 启动UI界面，浏览器打开
 
 [http://localhost:9000](http://localhost:9000)
 
 ## 代理规则
 
-`代理规则参考config.example.js`
+`代理规则参考config.js`
 
 ### >> 代理请求到本地文件
 ```
 {
-	"indexof": "http://m.v.qq.com/tvp/index.html",
-	"localFile": "/path/to/local/file/index.html"
+	regx: '^https?://v.qq.com/welcome.html',
+	'localFile': '/path/to/local/index.html'
 }
 ```
 ### >> 代理请求到本地目录
 ```
 {
-  "regxPath": "http://imgcache.qq.com/tencentvideo_v1/tvp/js/([^?]+)",
-  "localPath": "/path/to/local/file/"
+  'regx': 'http://imgcache.qq.com/tencentvideo_v1/tvp/js/([^?]+)',
+  'localPath': '/path/to/local/'
 }
 ```
 ### >> 代理文请求添加responseHeaders
 ```
 {
-  "regxPath": "http://imgcache.qq.com/tencentvideo_v1/tvp/js/([^?]+)",
-  "localPath": "/Users/zoborzhang/codes/tvp/",
-	"responseHeaders": {
-		"Access-Control-Allow-Origin":"http://v.qq.com",
-		"Access-Control-Allow-Credentials": "true"
+  'regxPath': 'http://imgcache.qq.com/tencentvideo_v1/tvp/js/([^?]+)',
+  'localPath': '/path/to/local/',
+	'responseHeaders': {
+		'Access-Control-Allow-Origin':'http://v.qq.com',
+		'Access-Control-Allow-Credentials': 'true'
 	}
 }
 ```
 ### >> cdn合并请求代理
 ```
 {
-  "regxCombo": "http://vm.gtimg.cn/c/=/tencentvideo/txp/js/([^?]+)",
-  "replacePath": "\/tencentvideo\/txp\/js\/",
-  "localPath": "/path/to/local/file/",
-  "responseHeaders": {
-	"Access-Control-Allow-Origin":"http://v.qq.com",
-	"Content-Type": "application/javascript",
-    "Access-Control-Allow-Origin":"*"
+  'regx': 'http://vm.gtimg.cn/c/=/tencentvideo/txp/js/([^?]+)',
+  'comboMaps': {
+    '/tencentvideo/txp/js/': '/path/to/local/',
   }
 }
 ```
 ### >> 支持cgi jsonp
 ```
 {
-  "indexof": "http://m.v.qq.com/getinfo",
-  "localFile": "/path/to/local/file/getinfo.json"
-  "useJSONPCallback": true
+  'indexof': 'http://vm.gtimg.cn/tencentvideo/txp/js/txplayer.json',
+  'jsonp': '/path/to/local/txplayer.json'
 }
 ```
-### >> cgi指定返回http status code
+### >> 指定返回http status code
 ```
 {
-  "indexof": "http://m.v.qq.com/getinfo",
-  "httpResponseCode": "404"
+  'regx': 'http://vm.gtimg.cn/tencentvideo/txp/js/txplayer.js',
+  'httpStatus': '404'
 }
 ```
 ### >> 单个请求指定hosts
 ```
 {
-  "indexof": "http://qzs.qq.com/tencentvideo_v1/tvp/js/tvp.player_v2_txv_vod.js",
-  "host": "10.123.9.9"
+  'regx': 'http://vm.gtimg.cn/tencentvideo/txp/js/txplayer.js',
+  'host': '127.0.0.1'
 }
 ```
-### >> 修改host无需重启app
-```
-var hosts = function(){
-/*
 
-#127.0.0.1 vm.gtimg.cn
-127.0.0.1 qzs.qq.com
+## 安装证书：
+### On MacOS
+cd /usr/local/lib/node_modules/browser-proxy/
+sh install_certificate.sh
 
-*/
-};
-```
+### On Android or IOS
+visit http://ip:9000/install
+
+### On Windows
+visit http://ip:9000/install and download certificate
+double click to install

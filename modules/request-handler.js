@@ -1,5 +1,6 @@
 'use strict';
 var request = require('request')
+var path = require('path')
 var fs      = require('fs')
 var pattern = require('./pattern')
 var URL     = require('url')
@@ -55,10 +56,11 @@ var pac, getProxy = ()=>{
   return '';
 };
 var pacHandler = (data)=>{
-  var injectPacFunction = fs.readFileSync('./modules/inject-pac-function.js');
+  var injectPacFunction = fs.readFileSync( path.resolve(__dirname,'./inject-pac-function.js') );
   var exportsCode = [injectPacFunction, 'module.exports=FindProxyForURL'].join('\n\n');
-  fs.writeFileSync('./cache/proxy.js', data + '\n\n' + exportsCode );
-  pac = require('../cache/proxy.js');
+  var proxyCache = configHandler.homePath + '/proxy.js';
+  fs.writeFileSync(proxyCache, data + '\n\n' + exportsCode );
+  pac = require(proxyCache);
   getProxy = function(hostname){
     var proxyStr = pac('', hostname);
     return 'http://' + proxyStr.replace(/^PROXY\s*/ig,'');
