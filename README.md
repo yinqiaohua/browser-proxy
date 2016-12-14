@@ -2,7 +2,6 @@
 
 ## UI界面
 ![Alt text](./images/pannel.png 'UI界面')
-![Alt text](./images/resp.png '响应界面')
 
 ## 前端调试的代理调试工具
 * 代理到本地文件
