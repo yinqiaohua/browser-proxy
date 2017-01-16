@@ -13,7 +13,7 @@ config.provinceName     = 'GuangDong';
 config.localityName     = 'ShenZhen';
 
 config.getDefaultCABasePath = () => {
-  var userHome = process.env.HOME || process.env.USERPROFILE;
+  const userHome = process.env.HOME || process.env.USERPROFILE;
   return path.resolve(userHome, './.AppData/browser-proxy');
 };
 

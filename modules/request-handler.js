@@ -4,7 +4,7 @@ var path = require('path')
 var fs      = require('fs')
 var pattern = require('./pattern')
 var URL     = require('url')
-var UI      = require('../modules/ui-app')
+var UI      = require('../modules/ui')
 var util    = require('../modules/util')
 var zlib    = require('zlib')
 var dns     = require('dns')
@@ -56,7 +56,7 @@ var pac, getProxy = ()=>{
   return '';
 };
 var pacHandler = (data)=>{
-  var injectPacFunction = fs.readFileSync( path.resolve(__dirname,'./inject-pac-function.js') );
+  var injectPacFunction = fs.readFileSync( path.resolve(__dirname,'./pac.js') );
   var exportsCode = [injectPacFunction, 'module.exports=FindProxyForURL'].join('\n\n');
   var proxyCache = configHandler.homePath + '/proxy.js';
   fs.writeFileSync(proxyCache, data + '\n\n' + exportsCode );

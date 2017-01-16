@@ -16,6 +16,15 @@ var localCertificate    = forge.pki.certificateFromPem(certificatePem);
 var localCertificateKey = forge.pki.privateKeyFromPem(certificateKeyPem);
 var cache = {};
 
+// 防止内存泄露，定时清理cache
+setInterval(function(){
+  var len = 0;
+  for(var i in cache){
+    len++;
+    if (len>=1000) cache = {};
+  }
+},5000);
+
 if (rs.create) {
   if (rs.create) {
     console.log(colors.cyan('CA Cert saved in: ' + rs.caCertPath));
@@ -25,7 +34,7 @@ if (rs.create) {
 
 var connectHandler = (req, socket, head) => {
   var httpsParams = url.parse('https://' + req.url);
-  if (1 || httpsParams.hostname==='v.qq.com') {
+  if (1) {
     getServerCertificate(httpsParams.hostname, httpsParams.port).then( (port) => {
       connect(req, socket, head, '127.0.0.1', port);
     })
@@ -36,12 +45,23 @@ var connectHandler = (req, socket, head) => {
 
 var connect = (req, socket, head, hostname, port) => {
   // tunneling https
-  var socketAgent = net.connect(port, hostname, () => {
-    var agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36";
-    socket.write('HTTP/1.1 200 Connection Established\r\n' + 'Proxy-agent: '+agent+'\r\n' + '\r\n');
+  var HOST = hostname;
+  var PORT = port;
+  var socketAgent = net.connect(PORT, HOST, () => {
+    // console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+    var agent = "Browser-Proxy Agent";
+    socket.write('HTTP/1.1 200 Connection Established\r\n' +
+      'Proxy-agent: '+agent+'\r\n' +
+      // 'HOST:' + hostname +
+      // 'PORT:' + port +
+      '\r\n'
+    );
     socketAgent.write(head);
     socketAgent.pipe(socket);
     socket.pipe(socketAgent);
+  });
+  socketAgent.on('data', (e) => {
+    // console.log(colors.green(e));
   });
   socketAgent.on('error', (e) => {
     console.log(colors.red(e));

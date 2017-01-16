@@ -46,6 +46,11 @@ class Filter extends React.Component {
     window.open('http://127.0.0.1:9000/settings')
   }
 
+  clearLocalData(e){
+    localStorage.clear()
+    location.reload()
+  }
+
   sendMsg(msg){
     this.props.msg.emit('filter', {
       value: msg
@@ -69,7 +74,7 @@ class Filter extends React.Component {
         <input onKeyDown={this.handlerKeyDown} onChange={this.handleChange} className="form-controla filter-input col-md-8" type="text" placeholder="请输入字符通过URL过滤请求" value={this.state.keyword} />
         <div className="col-md-2">
           <span className="glyphicon glyphicon-asterisk btn-secondary" onClick={this.settingClick} data-toggle="tooltip" data-placement="bottom" title="设置"></span>
-          <span className="glyphicon glyphicon-signal" data-toggle="tooltip" data-placement="bottom" title="弱网模拟"></span>
+          <span onClick={this.clearLocalData} className="glyphicon glyphicon-trash" data-toggle="tooltip" data-placement="bottom" title="清除缓存"></span>
         </div>
       </div>
     )

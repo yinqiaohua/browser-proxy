@@ -10,7 +10,7 @@ configHandler.msg.on('config-file-change', function(conf){
 
 
 
-module.exports = rulePattern = (req, res)=>{
+module.exports = (req, res)=>{
   var options = {};
   // match request url
   config.rules.forEach((rule, idx)=>{
@@ -30,11 +30,9 @@ module.exports = rulePattern = (req, res)=>{
   })
   if (!options.matched) return false
 
+
   // localFile
   if (options.responder.localFile) {
-    if (options.responder.localFile.indexOf('/')!==0) {
-      options.responder.localFile = path.resolve(__dirname, '../'+options.responder.localFile)
-    }
     if (fs.existsSync(options.responder.localFile)) {
       options.responseBody = fs.readFileSync(options.responder.localFile, 'utf-8')
     }else{
@@ -119,7 +117,8 @@ module.exports = rulePattern = (req, res)=>{
 
   // do response
   if (options.responseBody) {
-    res.writeHead(200, options.responseHeaders || {});
+    options.responder.httpStatus = 200
+    res.writeHead(options.responder.httpStatus, options.responseHeaders || {});
     res.end( options.responseBody )
     return {
       sid: req.__sid__,

@@ -1,9 +1,10 @@
 var colors = require('colors')
 var path = require('path')
-var caConfig = require('./ca-config.js')
+var caConfig = require('./cert.js')
 var configFile = path.resolve('./config.js')
 var defaultConfigFile = caConfig.getDefaultCABasePath()+'/config.js';
 var fs = require('fs')
+
 if (!fs.existsSync(configFile)) {
   if ( !fs.existsSync(defaultConfigFile) ) {
     fs.writeFileSync( defaultConfigFile,
@@ -13,7 +14,10 @@ if (!fs.existsSync(configFile)) {
   configFile = defaultConfigFile
 }
 var config = require(configFile)
-console.log( colors.yellow('browser-proxy Config Filepath: ') + colors.green.underline(configFile) )
+console.log(
+  colors.yellow('browser-proxy Config Filepath: ') +
+  colors.green.underline(configFile)
+)
 var chokidar = require('chokidar')
 var watcher = chokidar.watch(configFile, {
   ignored: /[\/\\]\./,

@@ -44,5 +44,5 @@ server.listen(AppPort, () => {
 
 
 process.on('uncaughtException', function(err){
-    console.error(colors.red('uncaughtException: ' + err.message))
+    console.log(err.stack)
 });

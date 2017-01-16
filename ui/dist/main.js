@@ -21946,6 +21946,12 @@
 	      window.open('http://127.0.0.1:9000/settings');
 	    }
 	  }, {
+	    key: 'clearLocalData',
+	    value: function clearLocalData(e) {
+	      localStorage.clear();
+	      location.reload();
+	    }
+	  }, {
 	    key: 'sendMsg',
 	    value: function sendMsg(msg) {
 	      this.props.msg.emit('filter', {
@@ -21980,7 +21986,7 @@
 	          'div',
 	          { className: 'col-md-2' },
 	          _react2.default.createElement('span', { className: 'glyphicon glyphicon-asterisk btn-secondary', onClick: this.settingClick, 'data-toggle': 'tooltip', 'data-placement': 'bottom', title: '\u8BBE\u7F6E' }),
-	          _react2.default.createElement('span', { className: 'glyphicon glyphicon-signal', 'data-toggle': 'tooltip', 'data-placement': 'bottom', title: '\u5F31\u7F51\u6A21\u62DF' })
+	          _react2.default.createElement('span', { onClick: this.clearLocalData, className: 'glyphicon glyphicon-trash', 'data-toggle': 'tooltip', 'data-placement': 'bottom', title: '\u6E05\u9664\u7F13\u5B58' })
 	        )
 	      );
 	    }
