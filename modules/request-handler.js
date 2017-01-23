@@ -21,7 +21,10 @@ configHandler.msg.on('config-file-change', function(conf){
 
 
 UI(true).on('ui-init', function(socket){
-    Msg = socket
+  Msg = socket
+  Msg.on('loadConfig',()=>{
+    Msg.emit('responseConfig', config)
+  })
 })
 
 var broadcast = (options)=>{

@@ -21,8 +21,8 @@ setInterval(function(){
   var len = 0;
   for(var i in cache){
     len++;
-    if (len>=1000) cache = {};
   }
+  if (len>=1000) cache = {};
 },5000);
 
 if (rs.create) {
