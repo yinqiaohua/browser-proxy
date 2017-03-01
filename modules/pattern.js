@@ -118,7 +118,7 @@ module.exports = (req, res)=>{
   // do response
   if (options.responseBody) {
     options.responder.httpStatus = 200
-    res.writeHead(options.responder.httpStatus, options.responseHeaders || {});
+    res.writeHead(options.responder.httpStatus, options.responseHeaders || {})
     res.end( options.responseBody )
     return {
       sid: req.__sid__,
@@ -129,9 +129,14 @@ module.exports = (req, res)=>{
       sendRequest: false
     }
   }else{
+    if (options.responder.comboParams){
+      options.remoteRequestUrl = options.responder.remoteUrl + req.url.replace(options.responder.regx, '')
+    }else{
+      options.remoteRequestUrl = options.responder.remoteUrl
+    }
     return {
       host: options.responder.host,
-      remoteUrl: options.responder.remoteUrl
+      remoteUrl: options.remoteRequestUrl
     }
   }
   return false

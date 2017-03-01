@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 var request = require('request')
 var path = require('path')
 var fs      = require('fs')
@@ -28,7 +28,7 @@ UI(true).on('ui-init', function(socket){
 })
 
 var broadcast = (options)=>{
-  if ( !(Msg && Msg.emit) ) return;
+  if ( !(Msg && Msg.emit) ) return
   Msg.emit('request', {
     url: options.url,
     sid: options.sid,
@@ -36,10 +36,10 @@ var broadcast = (options)=>{
     method: options.method,
     reqHeaders: options.reqheaders,
     reqStartTime: (+new Date)
-  });
+  })
 }
 var broadcastResponse = (options)=>{
-  if ( !(Msg && Msg.emit) ) return;
+  if ( !(Msg && Msg.emit) ) return
   Msg.emit('response', {
     sid: options.sid,
     body: options.body || '',
@@ -51,41 +51,41 @@ var broadcastResponse = (options)=>{
     resHeaders: options.resHeaders,
     hostname: options.hostname||'',
     serverip: options.serverip||''
-  });
+  })
 }
 
 
 var pac, getProxy = ()=>{
-  return '';
-};
+  return ''
+}
 var pacHandler = (data)=>{
-  var injectPacFunction = fs.readFileSync( path.resolve(__dirname,'./pac.js') );
-  var exportsCode = [injectPacFunction, 'module.exports=FindProxyForURL'].join('\n\n');
-  var proxyCache = configHandler.homePath + '/proxy.js';
-  fs.writeFileSync(proxyCache, data + '\n\n' + exportsCode );
-  pac = require(proxyCache);
+  var injectPacFunction = fs.readFileSync( path.resolve(__dirname,'./pac.js') )
+  var exportsCode = [injectPacFunction, 'module.exports=FindProxyForURL'].join('\n\n')
+  var proxyCache = configHandler.homePath + '/proxy.js'
+  fs.writeFileSync(proxyCache, data + '\n\n' + exportsCode )
+  pac = require(proxyCache)
   getProxy = function(hostname){
-    var proxyStr = pac('', hostname);
-    return 'http://' + proxyStr.replace(/^PROXY\s*/ig,'');
-  };
+    var proxyStr = pac('', hostname)
+    return 'http://' + proxyStr.replace(/^PROXY\s*/ig,'')
+  }
 }
 
 if (config && config.pac) {
   if (config.pac.indexOf('http://')===0 ||config.pac.indexOf('https://')===0) {
     request.get(config.pac, function(err, resp, body){
       if (err) {
-        console.error(colors.red(err));
-        return;
+        console.error(colors.red(err))
+        return
       }
-      pacHandler(body);
+      pacHandler(body)
     })
   }else{
     fs.readFile(config.pac, 'utf-8', (err, data)=>{
       if (err) {
-        console.error(colors.red(err));
-        return;
+        console.error(colors.red(err))
+        return
       }
-      pacHandler(data);
+      pacHandler(data)
     })
   }
 }
@@ -96,17 +96,17 @@ var showResponseText = (headers)=>{
     /text|html|xhtml|css|javascript|json|xml/i.test(headers['content-type'])
     && !/svg|image|mp4|video|png|gif|shockwave-flash/i.test(headers['content-type'])
   ) {
-    return true;
+    return true
   }
-  return false;
+  return false
 }
 
 
 module.exports = (req, res) => {
   var requestConfig = {
     headers: req.headers
-  };
-  requestConfig.url = req.url;
+  }
+  requestConfig.url = req.url
   if (!req.__sid__) req.__sid__ = util.GUID()
 
   var patterned
@@ -114,13 +114,13 @@ module.exports = (req, res) => {
   var proxy = ''
   var postBody = []
   var chunks = []
-  var serverIP;
+  var serverIP
 
   if (config.disable_cache) {
     // delte 清除缓存
-    delete requestConfig.headers['cache-control'];
-    delete requestConfig.headers['if-modified-since'];
-    delete requestConfig.headers['if-none-match'];
+    delete requestConfig.headers['cache-control']
+    delete requestConfig.headers['if-modified-since']
+    delete requestConfig.headers['if-none-match']
   }
   if (config.disable_gzip) {
     // 禁止gzip
@@ -140,25 +140,25 @@ module.exports = (req, res) => {
   // 匹配了不要再请求
   patterned = pattern(req, res) || {}
   if ( patterned.sendRequest===false ) {
-    patterned.serverip = '127.0.0.1';
+    patterned.serverip = '127.0.0.1'
     broadcastResponse(patterned)
-    return;
+    return
   }
   if (patterned && patterned.host) {
-    requestConfig.hostname = patterned.host;
+    requestConfig.hostname = patterned.host
   }
   else if (patterned && patterned.remoteUrl) {
-    requestConfig.url = patterned.remoteUrl;
+    requestConfig.url = patterned.remoteUrl
   }
 
   if ( !(patterned && patterned.host) ) {
     try{
-      proxy = getProxy(requestUrlData.hostname);
+      proxy = getProxy(requestUrlData.hostname)
     }catch(e){
       proxy = ''
     }
   }
-  request = request.defaults({'proxy': proxy==='http://DIRECT'?'':proxy});
+  request = request.defaults({'proxy': proxy==='http://DIRECT'?'':proxy})
 
   if ( !(patterned && patterned.host) ) {
     dns.lookup(requestUrlData.hostname, (err, addresses, family)=>{
@@ -177,8 +177,8 @@ module.exports = (req, res) => {
   }
   else if(req.method==='POST'){
     req.on('data', (chunk)=>{
-      postBody.push(chunk);
-    });
+      postBody.push(chunk)
+    })
     req.on('end', () =>{
       requestConfig.form = postBody.join('')
       broadcast({
@@ -195,14 +195,14 @@ module.exports = (req, res) => {
         chunks.push(chunk)
       })
       .pipe(res)
-    });
+    })
   }
 }
 
 var showResponseData=(err,response, body, patterned, req, serverIP, chunks)=>{
   var resBody
   if (err || !(response && response.headers) ) return
-  resBody = '';
+  resBody = ''
   if ( showResponseText(response.headers) ) {
     // 解压zip
     if (response.headers['content-encoding']==='gzip') {
@@ -221,10 +221,10 @@ var showResponseData=(err,response, body, patterned, req, serverIP, chunks)=>{
           resHeaders: response.headers,
           serverip: serverIP || patterned.host || '127.0.0.1'
         })
-      });
-      return;
+      })
+      return
     }else{
-      resBody = body;
+      resBody = body
     }
   }else{
     resBody = ''

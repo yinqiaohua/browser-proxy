@@ -1,6 +1,6 @@
 {
   "name": "browser-proxy",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "A Proxy For Developor",
   "bin": {
     "browser-proxy": "./bin/browser-proxy"
