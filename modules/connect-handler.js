@@ -39,29 +39,8 @@ var connectHandler = (req, socket, head) => {
       connect2(req, socket, head, '127.0.0.1', port);
     })
   } else {
-    connect(req, socket, head, httpsParams.hostname, httpsParams.port);
+    connect2(req, socket, head, httpsParams.hostname, httpsParams.port);
   }
-}
-
-var connect = (req, socket, head, hostname, port) => {
-  console.log(req)
-  // var url = require('url');
-  // var https = require('https');
-  // var HttpsProxyAgent = require('https-proxy-agent');
-  // var proxy = process.env.http_proxy || 'http://proxy.tencent.com:8080';
-  // console.log('using proxy server %j', proxy);
-  // var opts = url.parse('https://' + hostname);
-  // // opts = req;
-  // var agent = new HttpsProxyAgent(proxy);
-  // opts.agent = agent;
-  // https.get(opts, function (res, body) {
-  //   console.log('"response" event!', res.headers);
-  //   // res.pipe(process.stdout);
-  //   // console.log(body)
-  //   res.on('data', (d) => {
-  //     process.stdout.write(d);
-  //   });
-  // });
 }
 
 var connect2 = (req, socket, head, hostname, port) => {

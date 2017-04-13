@@ -7,7 +7,7 @@ var connectHandler = require('../modules/connect-handler.js')
 var program        = require('commander')
 var packageJson    = require('../package.json')
 var server         = new http.Server()
-var AppPort        = 8787
+var AppPort        = 8888
 var URL            = require('url')
 var util           = require('../modules/util')
 
@@ -20,6 +20,7 @@ AppPort = program.port || AppPort
 
 server.listen(AppPort, () => {
     console.log( colors.yellow('browser-proxy启动成功 端口: ') + colors.green(AppPort))
+    console.log( colors.yellow('安装证书 http://localhost:9000/install') )
     server.on('error', (e) => {
         console.error(colors.red(e))
     })
@@ -36,7 +37,7 @@ server.listen(AppPort, () => {
         connectHandler(req, socket, head)
     })
 
-    server.on('upgrade', function(req, socket, head) {
+    server.on('upgrade', (req, socket, head) => {
         console.log(res.url)
         // upgradeHandler(req, socket, head, ssl);
     });

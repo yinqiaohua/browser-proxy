@@ -155,6 +155,7 @@ module.exports = (req, res) => {
     try{
       proxy = getProxy(requestUrlData.hostname)
     }catch(e){
+      console.log(e)
       proxy = ''
     }
   }
