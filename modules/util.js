@@ -1,11 +1,4 @@
 var util = module.exports;
-// var tunnelAgent = require('tunnel-agent')
-// var AgentOrigin = require('agentkeepalive')
-
-
-
-
-
 util.getUrlParam = (p, u) => {
   var reg = new RegExp("(^|&|\\\\?)" + p + "=([^&]*)(&|$|#)"),
     r = null;
@@ -123,3 +116,17 @@ util.getTunnelAgent = (requestIsSSL, externalProxy) => {
     }
   }
 };
+
+util.getLocalIP = ()=>{
+  var os=require('os');  
+  var ifaces=os.networkInterfaces(); 
+  var iplist = []; 
+  for (var dev in ifaces) {  
+    ifaces[dev].forEach(function(details){  
+      if (details.family=='IPv4') {  
+        iplist.push(details.address)
+      }  
+    });  
+  }
+  return iplist;
+}

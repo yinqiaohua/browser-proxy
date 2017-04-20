@@ -10,6 +10,7 @@ var server         = new http.Server()
 var AppPort        = 8888
 var URL            = require('url')
 var util           = require('../modules/util')
+var localIp = util.getLocalIP()
 
 program.version(packageJson.version)
     .option('-c, --config [value]', 'config file path')
@@ -19,8 +20,8 @@ program.version(packageJson.version)
 AppPort = program.port || AppPort
 
 server.listen(AppPort, () => {
-    console.log( colors.yellow('browser-proxy启动成功 端口: ') + colors.green(AppPort))
-    console.log( colors.yellow('安装证书 http://localhost:9000/install') )
+    console.log(colors.yellow(`${"[启动成功]"} http://${localIp[0]||'127.0.0.1'}:${AppPort}`))
+    console.log( colors.yellow(`[安装证书] http://${localIp[0]||'127.0.0.1'}:9000/install`) )
     server.on('error', (e) => {
         console.error(colors.red(e))
     })
