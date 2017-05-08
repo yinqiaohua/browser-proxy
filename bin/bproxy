@@ -10,7 +10,7 @@ var server         = new http.Server()
 var AppPort        = 8888
 var URL            = require('url')
 var util           = require('../modules/util')
-var localIp = util.getLocalIP()
+var localIp        = util.getLocalIP()
 
 program.version(packageJson.version)
     .option('-c, --config [value]', 'config file path')

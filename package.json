@@ -1,16 +1,16 @@
 {
-  "name": "browser-proxy",
-  "version": "2.0.8",
+  "name": "bproxy",
+  "version": "2.0.13",
   "description": "A Proxy For Developor",
   "bin": {
-    "browser-proxy": "./bin/browser-proxy"
+    "bproxy": "./bin/bproxy"
   },
   "repository": {
     "type": "git",
-    "url": "http://zobor.me"
+    "url": "http://zobor.github.io"
   },
   "keywords": [
-    "proxy,nodejs proxy, browser-proxy"
+    "proxy,nodejs proxy, bproxy"
   ],
   "author": {
     "name": "zobor",

@@ -1,4 +1,4 @@
-# browser-proxy
+# bproxy
 
 ## UI界面
 ![Alt text](./images/pannel.png 'UI界面')
@@ -15,13 +15,13 @@
 
 ## install and start app
 ```
-sudo npm install browser-proxy -g
+sudo npm install bproxy -g
 
 // start browser proxy with default port
-browser-proxy
+bproxy
 
-// set port & start browser-proxy
-browser-proxy -p 8888
+// set port & start bproxy
+bproxy -p 8989
 
 // use local config
 mkdir -p /Users/zoborzhang/config/
@@ -40,7 +40,7 @@ edit config.js with follow code:
     disable_cache: true,
     disable_gzip: true
   }
-now start: browser-proxy
+now start: bproxy
 ```
 
 ## 启动UI界面，浏览器打开
